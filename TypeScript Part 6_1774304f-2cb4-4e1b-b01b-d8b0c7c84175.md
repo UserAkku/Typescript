@@ -1,0 +1,1221 @@
+# **PART 6: Functions & Generics - TypeScript Ka Power**
+
+## 6.1 Functions - TypeScript Mein Kaise Kaam Karte Hain 🔧
+
+### **JavaScript Mein Functions Ki Problem**
+
+javascript
+
+```javascript
+// JavaScript
+function add(a, b) {
+    return a + b;
+}
+
+console.log(add(5, 10));        // 15 ✅
+console.log(add(5, "10"));      // "510" ❌ String concatenation!
+console.log(add(5));            // NaN ❌ b is undefined
+console.log(add(5, 10, 15));    // 15 ❌ Extra argument ignored
+```
+
+**Problems:**
+
+- Parameters ka type pata nahi
+- Kitne parameters chahiye ye clear nahi
+- Return type kya hoga ye guaranteed nahi
+- Wrong arguments pass karne par error nahi
+
+---
+
+### **TypeScript Solution - Typed Functions**
+
+typescript
+
+```typescript
+function add(a: number, b: number): number {
+    return a + b;
+}
+```
+
+**Breakdown:**
+
+- `a: number` - First parameter, type number
+- `b: number` - Second parameter, type number
+- `: number` (function ke baad) - Return type number
+
+typescript
+
+```typescript
+console.log(add(5, 10));      // 15 ✅
+console.log(add(5, "10"));    // ❌ Error: Argument of type 'string' is not assignable
+console.log(add(5));          // ❌ Error: Expected 2 arguments, but got 1
+console.log(add(5, 10, 15));  // ❌ Error: Expected 2 arguments, but got 3
+```
+
+**Benefits:**
+
+- ✅ Compile time par hi error
+- ✅ IDE mein autocomplete
+- ✅ Return type guaranteed
+- ✅ Safe code
+
+---
+
+### **Function Declaration Types**
+
+#### **Type 1: Named Function**
+
+typescript
+
+```typescript
+function greet(name: string): string {
+    return `Hello, ${name}!`;
+}
+
+console.log(greet("Rahul"));  // "Hello, Rahul!"
+```
+
+#### **Type 2: Function Expression**
+
+typescript
+
+```typescript
+const greet = function(name: string): string {
+    return `Hello, ${name}!`;
+};
+```
+
+#### **Type 3: Arrow Function**
+
+typescript
+
+```typescript
+const greet = (name: string): string => {
+    return `Hello, ${name}!`;
+};
+
+// Single line arrow function
+const greet = (name: string): string => `Hello, ${name}!`;
+```
+
+---
+
+### **Function Type Annotation**
+
+Function ko variable mein store karte waqt **type specify** kar sakte ho:
+
+typescript
+
+```typescript
+// Variable ka type define karo
+let myFunction: (a: number, b: number) => number;
+
+// Ab iss type ka function assign karo
+myFunction = function(x, y) {
+    return x + y;
+};
+
+console.log(myFunction(5, 10));  // 15
+
+// Galat function assign karo
+myFunction = function(x, y) {
+    return `${x} + ${y}`;  // ❌ Error: Returns string, not number
+};
+```
+
+**Syntax:**
+
+typescript
+
+```typescript
+let functionName: (param1: type1, param2: type2) => returnType;
+```
+
+---
+
+### **Real Example: Calculator**
+
+typescript
+
+```typescript
+// Function type
+type MathOperation = (a: number, b: number) => number;
+
+// Functions
+const add: MathOperation = (a, b) => a + b;
+const subtract: MathOperation = (a, b) => a - b;
+const multiply: MathOperation = (a, b) => a * b;
+const divide: MathOperation = (a, b) => {
+    if (b === 0) {
+        throw new Error("Cannot divide by zero");
+    }
+    return a / b;
+};
+
+// Use karo
+console.log(add(10, 5));       // 15
+console.log(subtract(10, 5));  // 5
+console.log(multiply(10, 5));  // 50
+console.log(divide(10, 5));    // 2
+```
+
+---
+
+## 6.2 Optional Parameters - Zaroori Nahi ❓
+
+### **Problem: Har Parameter Zaroori Nahi Hota**
+
+typescript
+
+```typescript
+function greet(firstName: string, lastName: string): string {
+    return `Hello, ${firstName} ${lastName}`;
+}
+
+greet("Rahul");  // ❌ Error: Expected 2 arguments, but got 1
+```
+
+**Lekin kai baar sirf first name dena ho:**
+
+---
+
+### **Solution: Question Mark (?) Use Karo**
+
+typescript
+
+```typescript
+function greet(firstName: string, lastName?: string): string {
+    if (lastName) {
+        return `Hello, ${firstName} ${lastName}`;
+    }
+    return `Hello, ${firstName}`;
+}
+
+console.log(greet("Rahul"));              // "Hello, Rahul" ✅
+console.log(greet("Rahul", "Kumar"));     // "Hello, Rahul Kumar" ✅
+```
+
+**Rules:**
+
+1. Optional parameters mein `?` lagao
+2. Optional parameters **last mein** hone chahiye
+3. Optional parameters ka type `T | undefined` ban jata hai
+
+---
+
+### **Wrong Order - Error!**
+
+typescript
+
+```typescript
+// ❌ Galat - Optional parameter pehle
+function greet(lastName?: string, firstName: string): string {
+    // Error: A required parameter cannot follow an optional parameter
+}
+
+// ✅ Sahi - Optional parameter last mein
+function greet(firstName: string, lastName?: string): string {
+    // OK
+}
+```
+
+---
+
+### **Multiple Optional Parameters**
+
+typescript
+
+```typescript
+function createUser(
+    name: string,
+    age?: number,
+    email?: string,
+    phone?: string
+): object {
+    return {
+        name,
+        age: age || null,
+        email: email || null,
+        phone: phone || null
+    };
+}
+
+// Different combinations
+createUser("Rahul");
+createUser("Rahul", 25);
+createUser("Rahul", 25, "rahul@example.com");
+createUser("Rahul", 25, "rahul@example.com", "9876543210");
+```
+
+---
+
+### **Real Example: API Request**
+
+typescript
+
+```typescript
+interface RequestOptions {
+    method: string;
+    headers?: Record<string, string>;  // Optional
+    body?: string;                     // Optional
+}
+
+function apiRequest(
+    url: string,
+    options?: RequestOptions
+): Promise<any> {
+    const defaultOptions: RequestOptions = {
+        method: "GET"
+    };
+    
+    const finalOptions = { ...defaultOptions, ...options };
+    
+    return fetch(url, finalOptions);
+}
+
+// Simple call
+apiRequest("https://api.example.com/users");
+
+// With options
+apiRequest("https://api.example.com/users", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: "Rahul" })
+});
+```
+
+---
+
+## 6.3 Default Parameters - Default Value 🎯
+
+### **Optional vs Default - Difference**
+
+typescript
+
+```typescript
+// Optional - value nahi di to undefined
+function greet1(name: string, greeting?: string): string {
+    return `${greeting} ${name}`;  // greeting can be undefined
+}
+
+console.log(greet1("Rahul"));  // "undefined Rahul" ❌
+
+// Default - value nahi di to default value use hogi
+function greet2(name: string, greeting: string = "Hello"): string {
+    return `${greeting} ${name}`;
+}
+
+console.log(greet2("Rahul"));              // "Hello Rahul" ✅
+console.log(greet2("Rahul", "Namaste"));   // "Namaste Rahul" ✅
+```
+
+---
+
+### **Default Parameter Examples**
+
+#### **Example 1: Simple Default**
+
+typescript
+
+```typescript
+function power(base: number, exponent: number = 2): number {
+    return Math.pow(base, exponent);
+}
+
+console.log(power(5));      // 25 (5^2)
+console.log(power(5, 3));   // 125 (5^3)
+```
+
+#### **Example 2: Multiple Defaults**
+
+typescript
+
+```typescript
+function createUser(
+    name: string,
+    age: number = 18,
+    role: string = "user",
+    active: boolean = true
+): object {
+    return { name, age, role, active };
+}
+
+console.log(createUser("Rahul"));
+// { name: "Rahul", age: 18, role: "user", active: true }
+
+console.log(createUser("Simran", 25));
+// { name: "Simran", age: 25, role: "user", active: true }
+
+console.log(createUser("Admin", 30, "admin", false));
+// { name: "Admin", age: 30, role: "admin", active: false }
+```
+
+---
+
+### **Default Parameters - Type Inference**
+
+typescript
+
+```typescript
+// Type automatically infer hota hai
+function greet(name: string, prefix = "Mr.") {
+    // prefix ka type automatically "string" hai
+    return `${prefix} ${name}`;
+}
+```
+
+**Par explicitly type likhna better hai:**
+
+typescript
+
+```typescript
+function greet(name: string, prefix: string = "Mr."): string {
+    return `${prefix} ${name}`;
+}
+```
+
+---
+
+### **Real Example: Pagination**
+
+typescript
+
+```typescript
+interface PaginationParams {
+    page: number;
+    pageSize: number;
+    sortBy: string;
+    order: "asc" | "desc";
+}
+
+function fetchUsers(
+    page: number = 1,
+    pageSize: number = 10,
+    sortBy: string = "createdAt",
+    order: "asc" | "desc" = "desc"
+): PaginationParams {
+    return { page, pageSize, sortBy, order };
+}
+
+// Default values use hongi
+console.log(fetchUsers());
+// { page: 1, pageSize: 10, sortBy: "createdAt", order: "desc" }
+
+// Custom values
+console.log(fetchUsers(2, 20, "name", "asc"));
+// { page: 2, pageSize: 20, sortBy: "name", order: "asc" }
+```
+
+---
+
+## 6.4 Rest Parameters - Variable Arguments ...
+
+### **Problem: Unknown Number of Arguments**
+
+typescript
+
+```typescript
+// Agar 5 numbers add karne hain?
+function add(a: number, b: number): number {
+    return a + b;
+}
+
+// Agar 10 numbers add karne hain?
+// Har baar parameter add karna padega? ❌
+```
+
+---
+
+### **Solution: Rest Parameters**
+
+typescript
+
+```typescript
+function sum(...numbers: number[]): number {
+    return numbers.reduce((total, n) => total + n, 0);
+}
+
+console.log(sum(1, 2, 3));           // 6
+console.log(sum(1, 2, 3, 4, 5));     // 15
+console.log(sum(10, 20, 30, 40, 50, 60));  // 210
+```
+
+**Syntax:**
+
+typescript
+
+```typescript
+function functionName(...paramName: type[]): returnType {
+    // paramName ek array hai
+}
+```
+
+**Three dots (**`...`) = Rest operator
+
+---
+
+### **Rest Parameters Examples**
+
+#### **Example 1: Maximum Number**
+
+typescript
+
+```typescript
+function max(...numbers: number[]): number {
+    if (numbers.length === 0) {
+        throw new Error("At least one number required");
+    }
+    return Math.max(...numbers);
+}
+
+console.log(max(5, 10, 3, 8, 15));  // 15
+console.log(max(100, 50));          // 100
+```
+
+#### **Example 2: String Join**
+
+typescript
+
+```typescript
+function joinStrings(separator: string, ...strings: string[]): string {
+    return strings.join(separator);
+}
+
+console.log(joinStrings("-", "Hello", "World"));
+// "Hello-World"
+
+console.log(joinStrings(" | ", "A", "B", "C", "D"));
+// "A | B | C | D"
+```
+
+---
+
+### **Rest Parameters + Normal Parameters**
+
+typescript
+
+```typescript
+// Pehle normal parameters, last mein rest
+function greetAll(greeting: string, ...names: string[]): string[] {
+    return names.map(name => `${greeting}, ${name}!`);
+}
+
+console.log(greetAll("Hello", "Rahul", "Simran", "Raj"));
+// ["Hello, Rahul!", "Hello, Simran!", "Hello, Raj!"]
+```
+
+**Rules:**
+
+- Rest parameter **hamesha last mein**
+- Ek function mein **sirf ek rest parameter**
+
+typescript
+
+```typescript
+// ❌ Galat - rest parameter beech mein
+function wrong(a: number, ...rest: number[], b: number) {
+    // Error!
+}
+
+// ✅ Sahi - rest parameter last mein
+function correct(a: number, b: number, ...rest: number[]) {
+    // OK
+}
+```
+
+---
+
+### **Real Example: Logger Function**
+
+typescript
+
+```typescript
+type LogLevel = "info" | "warn" | "error";
+
+function log(level: LogLevel, ...messages: string[]): void {
+    const timestamp = new Date().toISOString();
+    const prefix = `[${timestamp}] [${level.toUpperCase()}]`;
+    
+    messages.forEach(message => {
+        console.log(`${prefix} ${message}`);
+    });
+}
+
+log("info", "Application started");
+log("warn", "Low memory", "CPU usage high");
+log("error", "Database connection failed", "Retrying in 5 seconds", "Please check config");
+```
+
+---
+
+## 6.5 Function Overloading - Ek Naam, Multiple Signatures 🔄
+
+### **Function Overloading Kya Hai?**
+
+**Same function, different parameter types:**
+
+typescript
+
+```typescript
+// Overload signatures
+function combine(a: string, b: string): string;
+function combine(a: number, b: number): number;
+
+// Implementation signature
+function combine(a: any, b: any): any {
+    if (typeof a === "string" && typeof b === "string") {
+        return a + b;  // String concatenation
+    }
+    if (typeof a === "number" && typeof b === "number") {
+        return a + b;  // Numeric addition
+    }
+}
+
+console.log(combine("Hello", "World"));  // "HelloWorld"
+console.log(combine(5, 10));             // 15
+console.log(combine("5", 10));           // ❌ Error: No matching overload
+```
+
+**Kaise kaam karta hai:**
+
+1. **Overload signatures** - Function ke possible variations
+2. **Implementation signature** - Actual code
+
+---
+
+### **Overloading Example - Date Parsing**
+
+typescript
+
+```typescript
+// Different ways to create a date
+function parseDate(timestamp: number): Date;
+function parseDate(year: number, month: number, day: number): Date;
+function parseDate(dateString: string): Date;
+
+// Implementation
+function parseDate(a: number | string, b?: number, c?: number): Date {
+    if (typeof a === "number" && b !== undefined && c !== undefined) {
+        // Year, month, day
+        return new Date(a, b - 1, c);
+    }
+    if (typeof a === "number" && b === undefined) {
+        // Timestamp
+        return new Date(a);
+    }
+    if (typeof a === "string") {
+        // String
+        return new Date(a);
+    }
+    throw new Error("Invalid arguments");
+}
+
+// Usage
+console.log(parseDate(1640995200000));           // Timestamp
+console.log(parseDate(2024, 1, 15));             // Year, month, day
+console.log(parseDate("2024-01-15"));            // String
+```
+
+---
+
+### **Real Example: Element Selection**
+
+typescript
+
+```typescript
+// Get element by different methods
+function getElement(id: string): HTMLElement | null;
+function getElement(element: HTMLElement): HTMLElement;
+
+function getElement(param: string | HTMLElement): HTMLElement | null {
+    if (typeof param === "string") {
+        return document.getElementById(param);
+    }
+    return param;
+}
+
+// Usage
+let elem1 = getElement("myDiv");                    // By ID
+let elem2 = getElement(document.body);              // By element
+```
+
+---
+
+## 6.6 Generics - Reusable Code Ki Power 💪
+
+### **Generics Kya Hai? (Concept Clear Karo)**
+
+**Real life example:**
+
+Socho ek **dabba (box)** hai:
+
+- **Number box** - Sirf numbers
+- **String box** - Sirf strings
+- **Book box** - Sirf books
+
+**Problem:** Har type ke liye alag box?
+
+**Solution:** **Generic box** - Koi bhi type daal sakte ho, par ek baar decide karne ke baad sirf wahi type!
+
+---
+
+### **Problem Without Generics**
+
+typescript
+
+```typescript
+// Number array ka first element
+function getFirstNumber(arr: number[]): number {
+    return arr[0];
+}
+
+// String array ka first element
+function getFirstString(arr: string[]): string {
+    return arr[0];
+}
+
+// Boolean array ka first element
+function getFirstBoolean(arr: boolean[]): boolean {
+    return arr[0];
+}
+
+// Har type ke liye alag function! ❌
+```
+
+**Problems:**
+
+- Code duplication
+- Har type ke liye naya function
+- Maintainability nightmare
+
+---
+
+### **Solution: Generic Function**
+
+typescript
+
+```typescript
+function getFirst<T>(arr: T[]): T {
+    return arr[0];
+}
+
+// Use karte waqt type specify karo
+let firstNum = getFirst<number>([1, 2, 3]);        // number
+let firstName = getFirst<string>(["a", "b", "c"]); // string
+let firstBool = getFirst<boolean>([true, false]);  // boolean
+
+// Type inference - TypeScript khud samajh jata hai
+let first1 = getFirst([1, 2, 3]);        // number (inferred)
+let first2 = getFirst(["a", "b", "c"]);  // string (inferred)
+```
+
+**Breakdown:**
+
+- `<T>` = Type parameter (placeholder for actual type)
+- `arr: T[]` = Array of type T
+- `: T` = Returns type T
+- `T` koi bhi naam ho sakta hai (T, U, V common hain)
+
+---
+
+### **Generic Kaise Padhein?**
+
+typescript
+
+```typescript
+function identity<T>(value: T): T {
+    return value;
+}
+```
+
+**Padho aise:**
+
+- "identity ek generic function hai"
+- "Jo ek type parameter T leta hai"
+- "Ek value leta hai type T ki"
+- "Aur return karta hai type T"
+- "T ko call time par specify kiya jayega"
+
+---
+
+### **Generic Examples**
+
+#### **Example 1: Array Operations**
+
+typescript
+
+```typescript
+// Last element
+function getLast<T>(arr: T[]): T {
+    return arr[arr.length - 1];
+}
+
+console.log(getLast([1, 2, 3, 4, 5]));           // 5
+console.log(getLast(["apple", "banana"]));       // "banana"
+
+// Reverse array
+function reverseArray<T>(arr: T[]): T[] {
+    return arr.reverse();
+}
+
+console.log(reverseArray([1, 2, 3]));            // [3, 2, 1]
+console.log(reverseArray(["a", "b", "c"]));      // ["c", "b", "a"]
+```
+
+---
+
+#### **Example 2: Pair/Tuple Creator**
+
+typescript
+
+```typescript
+function makePair<T, U>(first: T, second: U): [T, U] {
+    return [first, second];
+}
+
+let pair1 = makePair<string, number>("age", 25);
+// Type: [string, number]
+
+let pair2 = makePair<number, boolean>(1, true);
+// Type: [number, boolean]
+
+// Type inference
+let pair3 = makePair("name", "Rahul");  // [string, string]
+let pair4 = makePair(10, true);         // [number, boolean]
+```
+
+---
+
+#### **Example 3: API Response Wrapper**
+
+typescript
+
+```typescript
+interface ApiResponse<T> {
+    data: T;
+    status: number;
+    message: string;
+}
+
+// User response
+interface User {
+    id: number;
+    name: string;
+    email: string;
+}
+
+let userResponse: ApiResponse<User> = {
+    data: {
+        id: 1,
+        name: "Rahul",
+        email: "rahul@example.com"
+    },
+    status: 200,
+    message: "Success"
+};
+
+// Array response
+let usersResponse: ApiResponse<User[]> = {
+    data: [
+        { id: 1, name: "Rahul", email: "r1@e.com" },
+        { id: 2, name: "Simran", email: "s2@e.com" }
+    ],
+    status: 200,
+    message: "Success"
+};
+
+// String response
+let messageResponse: ApiResponse<string> = {
+    data: "Operation completed",
+    status: 200,
+    message: "Success"
+};
+```
+
+---
+
+### **Multiple Type Parameters**
+
+typescript
+
+```typescript
+function merge<T, U>(obj1: T, obj2: U): T & U {
+    return { ...obj1, ...obj2 };
+}
+
+let person = { name: "Rahul", age: 25 };
+let address = { city: "Delhi", country: "India" };
+
+let combined = merge(person, address);
+// Type: { name: string; age: number; city: string; country: string; }
+
+console.log(combined.name);     // "Rahul"
+console.log(combined.city);     // "Delhi"
+```
+
+---
+
+## 6.7 Generic Constraints - Type Ko Limit Karo 🚧
+
+### **Problem: Generic Too Flexible**
+
+typescript
+
+```typescript
+function logLength<T>(item: T): void {
+    console.log(item.length);  // ❌ Error!
+    // T mein length property nahi hai (guaranteed)
+}
+```
+
+**T kuch bhi ho sakta hai:**
+
+- number (no length)
+- boolean (no length)
+- string (has length) ✅
+- array (has length) ✅
+
+---
+
+### **Solution: Constraint Use Karo**
+
+**Syntax:**
+
+typescript
+
+```typescript
+function functionName<T extends ConstraintType>(param: T): ReturnType
+```
+
+#### **Example 1: Length Property Constraint**
+
+typescript
+
+```typescript
+// Interface define karo
+interface HasLength {
+    length: number;
+}
+
+// Constraint: T must have length property
+function logLength<T extends HasLength>(item: T): void {
+    console.log(item.length);  // ✅ Safe!
+}
+
+// Works with anything that has length
+logLength("Hello");           // ✅ string has length
+logLength([1, 2, 3]);         // ✅ array has length
+logLength({ length: 10 });    // ✅ object with length
+logLength(123);               // ❌ Error: number doesn't have length
+```
+
+---
+
+#### **Example 2: Object Property Access**
+
+typescript
+
+```typescript
+// Constraint: K must be a key of T
+function getProperty<T, K extends keyof T>(obj: T, key: K): T[K] {
+    return obj[key];
+}
+
+let person = {
+    name: "Rahul",
+    age: 25,
+    city: "Delhi"
+};
+
+console.log(getProperty(person, "name"));   // ✅ "Rahul"
+console.log(getProperty(person, "age"));    // ✅ 25
+console.log(getProperty(person, "email"));  // ❌ Error: 'email' not in person
+```
+
+`keyof T` = T ke sab keys ka union
+
+typescript
+
+```typescript
+type PersonKeys = keyof typeof person;  // "name" | "age" | "city"
+```
+
+---
+
+#### **Example 3: Minimum Value Constraint**
+
+typescript
+
+```typescript
+interface Comparable {
+    compareTo(other: Comparable): number;
+}
+
+function getMin<T extends Comparable>(items: T[]): T {
+    let min = items[0];
+    for (let item of items) {
+        if (item.compareTo(min) < 0) {
+            min = item;
+        }
+    }
+    return min;
+}
+```
+
+---
+
+### **Real Example: Database Query**
+
+typescript
+
+```typescript
+interface Entity {
+    id: number;
+}
+
+// T must extend Entity (must have id)
+function findById<T extends Entity>(items: T[], id: number): T | undefined {
+    return items.find(item => item.id === id);
+}
+
+interface User extends Entity {
+    name: string;
+    email: string;
+}
+
+interface Product extends Entity {
+    title: string;
+    price: number;
+}
+
+let users: User[] = [
+    { id: 1, name: "Rahul", email: "r@e.com" },
+    { id: 2, name: "Simran", email: "s@e.com" }
+];
+
+let products: Product[] = [
+    { id: 1, title: "Laptop", price: 45000 },
+    { id: 2, title: "Mouse", price: 500 }
+];
+
+let user = findById(users, 1);        // User | undefined
+let product = findById(products, 2);  // Product | undefined
+```
+
+---
+
+### **Class Constraint**
+
+typescript
+
+```typescript
+// T must be a class that can be instantiated
+function create<T>(ClassType: new () => T): T {
+    return new ClassType();
+}
+
+class Dog {
+    bark() {
+        console.log("Woof!");
+    }
+}
+
+class Cat {
+    meow() {
+        console.log("Meow!");
+    }
+}
+
+let dog = create(Dog);  // Dog instance
+dog.bark();
+
+let cat = create(Cat);  // Cat instance
+cat.meow();
+```
+
+---
+
+## 6.8 Generic Utility Types - Built-in Helpers 🛠️
+
+TypeScript mein **built-in generic types** hain jo common tasks ke liye:
+
+### **Partial&lt;T&gt; - Sab Properties Optional**
+
+typescript
+
+```typescript
+interface User {
+    id: number;
+    name: string;
+    email: string;
+    age: number;
+}
+
+// Sab properties optional ban gayi
+type PartialUser = Partial<User>;
+// {
+//     id?: number;
+//     name?: string;
+//     email?: string;
+//     age?: number;
+// }
+
+function updateUser(user: User, updates: Partial<User>): User {
+    return { ...user, ...updates };
+}
+
+let user: User = {
+    id: 1,
+    name: "Rahul",
+    email: "rahul@example.com",
+    age: 25
+};
+
+// Sirf kuch properties update karo
+user = updateUser(user, { name: "Rahul Kumar" });
+user = updateUser(user, { age: 26, email: "new@example.com" });
+```
+
+---
+
+### **Required&lt;T&gt; - Sab Properties Required**
+
+typescript
+
+```typescript
+interface User {
+    id: number;
+    name: string;
+    email?: string;  // Optional
+    phone?: string;  // Optional
+}
+
+// Sab required ban gaye
+type RequiredUser = Required<User>;
+// {
+//     id: number;
+//     name: string;
+//     email: string;   // No longer optional
+//     phone: string;   // No longer optional
+// }
+```
+
+---
+
+### **Readonly&lt;T&gt; - Sab Properties Readonly**
+
+typescript
+
+```typescript
+interface User {
+    id: number;
+    name: string;
+}
+
+type ReadonlyUser = Readonly<User>;
+// {
+//     readonly id: number;
+//     readonly name: string;
+// }
+
+let user: ReadonlyUser = { id: 1, name: "Rahul" };
+user.name = "Raj";  // ❌ Error: Cannot assign to 'name'
+```
+
+---
+
+### **Pick&lt;T, K&gt; - Kuch Properties Choose Karo**
+
+typescript
+
+```typescript
+interface User {
+    id: number;
+    name: string;
+    email: string;
+    age: number;
+    address: string;
+}
+
+// Sirf id aur name
+type UserPreview = Pick<User, "id" | "name">;
+// {
+//     id: number;
+//     name: string;
+// }
+
+let preview: UserPreview = {
+    id: 1,
+    name: "Rahul"
+    // Baaki properties nahi chahiye
+};
+```
+
+---
+
+### **Omit&lt;T, K&gt; - Kuch Properties Hatao**
+
+typescript
+
+```typescript
+interface User {
+    id: number;
+    name: string;
+    email: string;
+    password: string;
+}
+
+// Password ko chhod do (security)
+type UserWithoutPassword = Omit<User, "password">;
+// {
+//     id: number;
+//     name: string;
+//     email: string;
+// }
+
+function sendUserToClient(user: User): UserWithoutPassword {
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
+}
+```
+
+---
+
+### **Record&lt;K, T&gt; - Key-Value Pairs**
+
+typescript
+
+```typescript
+// Keys: string, Values: number
+type ScoreBoard = Record<string, number>;
+
+let scores: ScoreBoard = {
+    "rahul": 95,
+    "simran": 87,
+    "raj": 92
+};
+
+// Keys: specific literals, Values: User
+type UserRoles = Record<"admin" | "user" | "guest", User>;
+
+let roleUsers: UserRoles = {
+    admin: { id: 1, name: "Admin" },
+    user: { id: 2, name: "User" },
+    guest: { id: 3, name: "Guest" }
+};
+```
+
+---
+
+
+**Kya seekha:**
+
+- ✅ Functions (typed parameters, return types)
+- ✅ Optional parameters (?)
+- ✅ Default parameters
+- ✅ Rest parameters (...)
+- ✅ Function overloading
+- ✅ Generics introduction
+- ✅ Generic functions
+- ✅ Generic constraints
+- ✅ Utility types

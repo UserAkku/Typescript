@@ -1,0 +1,1181 @@
+# **PART 5: Advanced Object Types & Type Manipulation**
+
+## 5.1 Type Alias vs Interface - Kaun Better Hai? 🤔
+
+### **Pehle Dono Ko Side-by-Side Dekho**
+
+typescript
+
+```typescript
+// Type Alias
+type User = {
+    name: string;
+    age: number;
+};
+
+// Interface
+interface User {
+    name: string;
+    age: number;
+}
+```
+
+**Dekho dono same lag rahe hain!** To farak kya hai?
+
+---
+
+### **Difference #1: Extension (Inheritance)**
+
+#### **Interface - extends keyword**
+
+typescript
+
+```typescript
+interface Animal {
+    name: string;
+}
+
+interface Dog extends Animal {
+    breed: string;
+}
+
+let myDog: Dog = {
+    name: "Tommy",  // From Animal
+    breed: "Labrador"
+};
+```
+
+#### **Type Alias - intersection (&)**
+
+typescript
+
+```typescript
+type Animal = {
+    name: string;
+};
+
+type Dog = Animal & {
+    breed: string;
+};
+
+let myDog: Dog = {
+    name: "Tommy",
+    breed: "Labrador"
+};
+```
+
+**Kya farak hai?**
+
+- Interface: `extends` keyword (readable, OOP style)
+- Type: `&` operator (functional style)
+- Dono same result dete hain
+
+---
+
+### **Difference #2: Declaration Merging**
+
+**Interface ka magic trick:**
+
+typescript
+
+```typescript
+// Pehli baar declare kiya
+interface Window {
+    title: string;
+}
+
+// Doosri baar same naam se declare kiya
+interface Window {
+    version: number;
+}
+
+// Dono merge ho gaye!
+let myWindow: Window = {
+    title: "My App",
+    version: 1.0
+};
+```
+
+**Type alias ke saath ye nahi hoga:**
+
+typescript
+
+```typescript
+type Window = {
+    title: string;
+};
+
+type Window = {
+    version: number;
+};
+// ❌ Error: Duplicate identifier 'Window'
+```
+
+**Kab useful hai?**
+
+- Third-party libraries extend karne ke liye
+- Global objects mein properties add karne ke liye
+
+**Real Example:**
+
+typescript
+
+```typescript
+// TypeScript ka built-in Window interface
+interface Window {
+    myCustomProperty: string;
+    myCustomFunction: () => void;
+}
+
+// Ab browser ka window object mein ye properties available hain
+window.myCustomProperty = "hello";
+window.myCustomFunction = () => console.log("Hi");
+```
+
+---
+
+### **Difference #3: Primitives, Unions, Tuples**
+
+**Type alias can do this:**
+
+typescript
+
+```typescript
+// Primitive type alias
+type ID = string | number;
+
+// Union type alias
+type Status = "pending" | "approved" | "rejected";
+
+// Tuple type alias
+type Coordinate = [number, number];
+
+// Function type alias
+type MathOperation = (a: number, b: number) => number;
+```
+
+**Interface CANNOT do this:**
+
+typescript
+
+```typescript
+// ❌ Interface nahi kar sakta
+interface ID = string | number;  // Error!
+interface Status = "pending" | "approved";  // Error!
+```
+
+**Interface sirf objects ke liye hai!**
+
+---
+
+### **Difference #4: Computed Properties**
+
+**Type alias:**
+
+typescript
+
+```typescript
+type Keys = "name" | "age";
+
+type User = {
+    [K in Keys]: string;
+};
+
+// Result:
+// {
+//     name: string;
+//     age: string;
+// }
+```
+
+**Interface mein ye directly nahi ho sakta** (advanced mapped types ke liye type use karo)
+
+---
+
+### **Kab Kya Use Karein? - Clear Guide**
+
+<table>
+<tbody><tr><th colspan="1" rowspan="1"><p>Use Case</p></th><th colspan="1" rowspan="1"><p>Use This</p></th><th colspan="1" rowspan="1"><p>Why</p></th></tr><tr><td colspan="1" rowspan="1"><p>Object shapes</p></td><td colspan="1" rowspan="1"><p><strong>Interface</strong></p></td><td colspan="1" rowspan="1"><p>Extendable, clearer intent</p></td></tr><tr><td colspan="1" rowspan="1"><p>React component props</p></td><td colspan="1" rowspan="1"><p><strong>Interface</strong></p></td><td colspan="1" rowspan="1"><p>Can be extended later</p></td></tr><tr><td colspan="1" rowspan="1"><p>API response types</p></td><td colspan="1" rowspan="1"><p><strong>Interface</strong></p></td><td colspan="1" rowspan="1"><p>Clear contract</p></td></tr><tr><td colspan="1" rowspan="1"><p>Union types</p></td><td colspan="1" rowspan="1"><p><strong>Type</strong></p></td><td colspan="1" rowspan="1"><p>Interface can't do this</p></td></tr><tr><td colspan="1" rowspan="1"><p>Primitives/Literals</p></td><td colspan="1" rowspan="1"><p><strong>Type</strong></p></td><td colspan="1" rowspan="1"><p>Interface can't do this</p></td></tr><tr><td colspan="1" rowspan="1"><p>Tuples</p></td><td colspan="1" rowspan="1"><p><strong>Type</strong></p></td><td colspan="1" rowspan="1"><p>Interface can't do this</p></td></tr><tr><td colspan="1" rowspan="1"><p>Function types</p></td><td colspan="1" rowspan="1"><p><strong>Type</strong></p></td><td colspan="1" rowspan="1"><p>More concise</p></td></tr><tr><td colspan="1" rowspan="1"><p>Utility/helper types</p></td><td colspan="1" rowspan="1"><p><strong>Type</strong></p></td><td colspan="1" rowspan="1"><p>More flexible</p></td></tr></tbody>
+</table>
+
+---
+
+### **Real-World Decision Tree**
+
+typescript
+
+```typescript
+// ✅ Use Interface - Object shape, might extend later
+interface User {
+    id: number;
+    name: string;
+    email: string;
+}
+
+interface Admin extends User {
+    permissions: string[];
+}
+
+// ✅ Use Type - Union of literals
+type UserRole = "admin" | "user" | "guest";
+
+// ✅ Use Type - Tuple
+type RGB = [number, number, number];
+
+// ✅ Use Type - Function signature
+type EventHandler = (event: Event) => void;
+
+// ✅ Use Interface - React Props
+interface ButtonProps {
+    text: string;
+    onClick: () => void;
+    disabled?: boolean;
+}
+
+// ✅ Use Type - API Response (could use interface too)
+type ApiResponse<T> = {
+    data: T;
+    status: number;
+    message: string;
+};
+```
+
+---
+
+### **Best Practice Recommendation**
+
+**Simple rule:**
+
+1. **Objects → Interface**
+2. **Everything else → Type**
+3. **Not sure? → Interface** (safer, more extendable)
+
+---
+
+## 5.2 Union Types - "Ya To Ye Ya Wo" |
+
+### **Union Type Kya Hai?**
+
+**Real life example:**
+
+- Payment method: **Cash** ya **Card** ya **UPI**
+- File type: **PDF** ya **Image** ya **Video**
+- Response: **Success** ya **Error**
+
+TypeScript mein:
+
+typescript
+
+```typescript
+let paymentMethod: "cash" | "card" | "upi";
+```
+
+**Pipe symbol (**`|`) ka matlab hai **"OR"**
+
+---
+
+### **Basic Union Examples**
+
+#### **Example 1: Simple Union**
+
+typescript
+
+```typescript
+let id: string | number;
+
+id = "ABC123";  // ✅ String
+id = 12345;     // ✅ Number
+id = true;      // ❌ Error - boolean nahi allowed
+```
+
+**Padho aise:** "id ya to string ho sakta hai **YA** number"
+
+---
+
+#### **Example 2: Literal Union (Most Common)**
+
+typescript
+
+```typescript
+type Status = "pending" | "approved" | "rejected";
+
+let orderStatus: Status = "pending";     // ✅ OK
+orderStatus = "approved";                // ✅ OK
+orderStatus = "cancelled";               // ❌ Error - Not in union
+```
+
+**Why powerful?**
+
+- Typo protection
+- Autocomplete milega
+- Limited options, safer code
+
+---
+
+#### **Example 3: Multiple Types**
+
+typescript
+
+```typescript
+type Input = string | number | boolean;
+
+let userInput: Input;
+
+userInput = "hello";   // ✅
+userInput = 123;       // ✅
+userInput = true;      // ✅
+userInput = null;      // ❌ Error
+```
+
+---
+
+### **Union with Objects**
+
+typescript
+
+```typescript
+type SuccessResponse = {
+    status: "success";
+    data: any;
+};
+
+type ErrorResponse = {
+    status: "error";
+    error: string;
+};
+
+type ApiResponse = SuccessResponse | ErrorResponse;
+
+function handleResponse(response: ApiResponse) {
+    // response ya to SuccessResponse hai ya ErrorResponse
+}
+```
+
+---
+
+### **Type Narrowing - Union Ko Handle Karna**
+
+**Problem:**
+
+typescript
+
+```typescript
+function printId(id: string | number) {
+    console.log(id.toUpperCase());  // ❌ Error!
+    // toUpperCase() sirf string mein hai, number mein nahi
+}
+```
+
+**Solution: Type check karo (Type Narrowing)**
+
+#### **Method 1: typeof check**
+
+typescript
+
+```typescript
+function printId(id: string | number) {
+    if (typeof id === "string") {
+        // Yahan TypeScript jaanta hai: id is string
+        console.log(id.toUpperCase());  // ✅ Safe
+    } else {
+        // Yahan TypeScript jaanta hai: id is number
+        console.log(id.toFixed(2));     // ✅ Safe
+    }
+}
+
+printId("abc123");  // "ABC123"
+printId(42);        // "42.00"
+```
+
+**Kya hua?**
+
+- `typeof id === "string"` check ke andar TypeScript **automatically** jaanta hai ki `id` string hai
+- Else block mein automatically jaanta hai ki `id` number hai
+- Isko **Type Narrowing** kehte hain
+
+---
+
+#### **Method 2: Truthiness check**
+
+typescript
+
+```typescript
+function printName(name: string | null | undefined) {
+    if (name) {
+        // Yahan name definitely string hai (truthy)
+        console.log(name.toUpperCase());
+    } else {
+        // Yahan name null ya undefined hai
+        console.log("No name provided");
+    }
+}
+```
+
+---
+
+#### **Method 3: in operator**
+
+typescript
+
+```typescript
+type Fish = { swim: () => void };
+type Bird = { fly: () => void };
+
+function move(animal: Fish | Bird) {
+    if ("swim" in animal) {
+        // Animal is Fish
+        animal.swim();
+    } else {
+        // Animal is Bird
+        animal.fly();
+    }
+}
+```
+
+---
+
+### **Real Example: Form Field Value**
+
+typescript
+
+```typescript
+type FieldValue = string | number | boolean | Date | null;
+
+interface FormField {
+    name: string;
+    value: FieldValue;
+}
+
+function getFieldDisplay(field: FormField): string {
+    let value = field.value;
+    
+    if (value === null) {
+        return "Not set";
+    }
+    
+    if (typeof value === "string") {
+        return value;
+    }
+    
+    if (typeof value === "number") {
+        return value.toString();
+    }
+    
+    if (typeof value === "boolean") {
+        return value ? "Yes" : "No";
+    }
+    
+    if (value instanceof Date) {
+        return value.toLocaleDateString();
+    }
+    
+    return "Unknown";
+}
+
+// Usage
+let nameField: FormField = { name: "username", value: "Rahul" };
+console.log(getFieldDisplay(nameField));  // "Rahul"
+
+let ageField: FormField = { name: "age", value: 25 };
+console.log(getFieldDisplay(ageField));  // "25"
+
+let activeField: FormField = { name: "active", value: true };
+console.log(getFieldDisplay(activeField));  // "Yes"
+```
+
+---
+
+### **Union Array**
+
+typescript
+
+```typescript
+// Array of mixed types
+let data: (string | number)[] = ["Rahul", 25, "Delhi", 110001];
+
+// Har element ko check karna padega
+data.forEach(item => {
+    if (typeof item === "string") {
+        console.log("String:", item.toUpperCase());
+    } else {
+        console.log("Number:", item.toFixed(2));
+    }
+});
+```
+
+---
+
+## 5.3 Intersection Types - "Ye Bhi Aur Wo Bhi" &
+
+### **Intersection Type Kya Hai?**
+
+**Real life example:**
+
+- **Teacher + Developer** = Teaching + Coding dono kar sakta hai
+- **Car + Boat** = Drive + Sail dono kar sakta hai
+- **SuperAdmin** = Admin rights + User rights + Extra rights
+
+TypeScript mein:
+
+typescript
+
+```typescript
+type Combined = Type1 & Type2;
+```
+
+**Ampersand (**`&`) ka matlab hai **"AND"**
+
+---
+
+### **Basic Intersection Example**
+
+typescript
+
+```typescript
+type Person = {
+    name: string;
+    age: number;
+};
+
+type Employee = {
+    employeeId: string;
+    department: string;
+};
+
+// Intersection: Dono ki properties combined
+type EmployeePerson = Person & Employee;
+
+let emp: EmployeePerson = {
+    // Person properties
+    name: "Rahul",
+    age: 25,
+    // Employee properties
+    employeeId: "EMP001",
+    department: "IT"
+    // Sab properties chahiye!
+};
+```
+
+**Padho aise:** "EmployeePerson ko Person ki **bhi** properties chahiye **aur** Employee ki **bhi**"
+
+---
+
+### **Union vs Intersection - Difference Samjho**
+
+typescript
+
+```typescript
+type A = { name: string };
+type B = { age: number };
+
+// Union: A YA B (koi bhi ek)
+type UnionType = A | B;
+
+let union1: UnionType = { name: "Rahul" };              // ✅ Only A
+let union2: UnionType = { age: 25 };                    // ✅ Only B
+let union3: UnionType = { name: "Rahul", age: 25 };    // ✅ Both
+
+// Intersection: A AUR B (dono chahiye)
+type IntersectionType = A & B;
+
+let inter1: IntersectionType = { name: "Rahul" };              // ❌ age missing
+let inter2: IntersectionType = { age: 25 };                    // ❌ name missing
+let inter3: IntersectionType = { name: "Rahul", age: 25 };    // ✅ Both present
+```
+
+**Simple rule:**
+
+- **Union (**`|`): Koi bhi ek satisfy karo
+- **Intersection (**`&`): Sab satisfy karo
+
+---
+
+### **Real Example: User System**
+
+typescript
+
+```typescript
+type User = {
+    id: number;
+    username: string;
+    email: string;
+};
+
+type Timestamps = {
+    createdAt: Date;
+    updatedAt: Date;
+};
+
+type Permissions = {
+    canEdit: boolean;
+    canDelete: boolean;
+    canCreate: boolean;
+};
+
+// Super type: Sab kuch combined
+type AdminUser = User & Timestamps & Permissions;
+
+let admin: AdminUser = {
+    // User
+    id: 1,
+    username: "admin",
+    email: "admin@example.com",
+    // Timestamps
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    // Permissions
+    canEdit: true,
+    canDelete: true,
+    canCreate: true
+};
+```
+
+---
+
+### **Mixin Pattern with Intersections**
+
+typescript
+
+```typescript
+// Base features
+type Loggable = {
+    log: (message: string) => void;
+};
+
+type Serializable = {
+    toJSON: () => string;
+};
+
+type Comparable<T> = {
+    compareTo: (other: T) => number;
+};
+
+// Combine all
+type FullFeatured = Loggable & Serializable & Comparable<FullFeatured>;
+
+let obj: FullFeatured = {
+    log(message) {
+        console.log(message);
+    },
+    toJSON() {
+        return JSON.stringify(this);
+    },
+    compareTo(other) {
+        return 0;
+    }
+};
+```
+
+---
+
+### **Intersection with Conflicting Types**
+
+**Kya hoga agar same property different types ke saath ho?**
+
+typescript
+
+```typescript
+type A = { value: string };
+type B = { value: number };
+
+type C = A & B;
+
+let obj: C = {
+    value: ???  // ❌ Kya ho? String ya number?
+};
+```
+
+**Answer:** `value` ka type `never` ban jayega!
+
+- String **aur** number dono ek saath nahi ho sakte
+- Intersection impossible hai
+- Type becomes `never`
+
+typescript
+
+```typescript
+type C = { value: never };
+// Practically useless
+```
+
+**Lesson:** Intersections mein make sure properties compatible hain
+
+---
+
+## 5.4 Type Guards - Runtime Par Type Check 🛡️
+
+### **Type Guard Kya Hai?**
+
+**Problem:**
+
+typescript
+
+```typescript
+function processValue(value: string | number) {
+    // Yahan value kaunsa type hai? Pata nahi!
+    value.toUpperCase();  // ❌ Error if value is number
+    value.toFixed(2);     // ❌ Error if value is string
+}
+```
+
+**Solution:** Runtime par check karo ki value kaunsa type hai
+
+**Type Guard = Code jo TypeScript ko bataye ki type kya hai**
+
+---
+
+### **Type Guard #1: typeof (Primitives ke liye)**
+
+typescript
+
+```typescript
+function padLeft(value: string, padding: string | number): string {
+    if (typeof padding === "number") {
+        // TypeScript knows: padding is number
+        return " ".repeat(padding) + value;
+    }
+    // TypeScript knows: padding is string (else case)
+    return padding + value;
+}
+
+console.log(padLeft("Hello", 4));      // "    Hello"
+console.log(padLeft("Hello", ">>> ")); // ">>> Hello"
+```
+
+**typeof values:**
+
+- `"string"`
+- `"number"`
+- `"boolean"`
+- `"undefined"`
+- `"object"` (arrays aur null bhi!)
+- `"function"`
+
+---
+
+### **Type Guard #2: instanceof (Classes ke liye)**
+
+typescript
+
+```typescript
+class Dog {
+    bark() {
+        console.log("Woof!");
+    }
+}
+
+class Cat {
+    meow() {
+        console.log("Meow!");
+    }
+}
+
+function makeSound(animal: Dog | Cat) {
+    if (animal instanceof Dog) {
+        // TypeScript knows: animal is Dog
+        animal.bark();
+    } else {
+        // TypeScript knows: animal is Cat
+        animal.meow();
+    }
+}
+
+let myDog = new Dog();
+let myCat = new Cat();
+
+makeSound(myDog);  // "Woof!"
+makeSound(myCat);  // "Meow!"
+```
+
+---
+
+### **Type Guard #3: in operator (Properties check)**
+
+typescript
+
+```typescript
+type Fish = {
+    swim: () => void;
+};
+
+type Bird = {
+    fly: () => void;
+};
+
+function move(animal: Fish | Bird) {
+    if ("swim" in animal) {
+        // TypeScript knows: animal has swim property, so it's Fish
+        animal.swim();
+    } else {
+        // TypeScript knows: animal is Bird
+        animal.fly();
+    }
+}
+
+let fish: Fish = {
+    swim() {
+        console.log("Swimming...");
+    }
+};
+
+let bird: Bird = {
+    fly() {
+        console.log("Flying...");
+    }
+};
+
+move(fish);  // "Swimming..."
+move(bird);  // "Flying..."
+```
+
+---
+
+### **Type Guard #4: Custom Type Guard (User-defined)**
+
+**Syntax:**
+
+typescript
+
+```typescript
+function isType(value: any): value is TargetType {
+    // Check logic
+    return condition;
+}
+```
+
+`value is TargetType` = Type predicate
+
+#### **Example 1: Custom Type Guard**
+
+typescript
+
+```typescript
+interface Car {
+    drive: () => void;
+    wheels: number;
+}
+
+interface Boat {
+    sail: () => void;
+    speed: number;
+}
+
+// Custom type guard function
+function isCar(vehicle: Car | Boat): vehicle is Car {
+    return (vehicle as Car).drive !== undefined;
+}
+
+function operate(vehicle: Car | Boat) {
+    if (isCar(vehicle)) {
+        // TypeScript knows: vehicle is Car
+        console.log("Driving with", vehicle.wheels, "wheels");
+        vehicle.drive();
+    } else {
+        // TypeScript knows: vehicle is Boat
+        console.log("Sailing at", vehicle.speed, "knots");
+        vehicle.sail();
+    }
+}
+```
+
+---
+
+#### **Example 2: API Response Type Guard**
+
+typescript
+
+```typescript
+interface SuccessResponse {
+    status: "success";
+    data: any;
+}
+
+interface ErrorResponse {
+    status: "error";
+    error: string;
+}
+
+type ApiResponse = SuccessResponse | ErrorResponse;
+
+// Type guard
+function isSuccessResponse(response: ApiResponse): response is SuccessResponse {
+    return response.status === "success";
+}
+
+function handleResponse(response: ApiResponse) {
+    if (isSuccessResponse(response)) {
+        // TypeScript knows: response is SuccessResponse
+        console.log("Data:", response.data);
+    } else {
+        // TypeScript knows: response is ErrorResponse
+        console.log("Error:", response.error);
+    }
+}
+```
+
+---
+
+### **Type Guard #5: Discriminated Unions (Best Pattern)**
+
+**Isko detail mein next section mein dekhenge!**
+
+---
+
+### **Null/Undefined Guards**
+
+typescript
+
+```typescript
+function printName(name: string | null | undefined) {
+    // Simple truthiness check
+    if (name) {
+        console.log(name.toUpperCase());
+    } else {
+        console.log("No name");
+    }
+    
+    // Explicit null check
+    if (name !== null && name !== undefined) {
+        console.log(name.toUpperCase());
+    }
+    
+    // Non-null assertion (unsafe, avoid!)
+    console.log(name!.toUpperCase());  // ⚠️ Risky!
+}
+```
+
+---
+
+### **Array Type Guard**
+
+typescript
+
+```typescript
+function processValue(value: string | string[]) {
+    if (Array.isArray(value)) {
+        // TypeScript knows: value is string[]
+        console.log("Array length:", value.length);
+        value.forEach(item => console.log(item));
+    } else {
+        // TypeScript knows: value is string
+        console.log("String:", value.toUpperCase());
+    }
+}
+```
+
+---
+
+## 5.5 Discriminated Unions - Smart Pattern 🎯
+
+### **Discriminated Union Kya Hai?**
+
+**Problem with normal union:**
+
+typescript
+
+```typescript
+type Shape = Circle | Square | Rectangle;
+
+function getArea(shape: Shape) {
+    // shape kaunsa type hai? Kaise pata lagayein?
+}
+```
+
+**Solution: Common property use karo (Discriminant)**
+
+typescript
+
+```typescript
+interface Circle {
+    kind: "circle";  // ← Discriminant property
+    radius: number;
+}
+
+interface Square {
+    kind: "square";  // ← Discriminant property
+    sideLength: number;
+}
+
+type Shape = Circle | Square;
+
+function getArea(shape: Shape): number {
+    switch (shape.kind) {
+        case "circle":
+            // TypeScript knows: shape is Circle
+            return Math.PI * shape.radius ** 2;
+        case "square":
+            // TypeScript knows: shape is Square
+            return shape.sideLength ** 2;
+    }
+}
+```
+
+**Key points:**
+
+- Har type mein **same naam ki property** (`kind`)
+- Har type mein **unique literal value** (`"circle"`, `"square"`)
+- Switch/if mein uss property ko check karo
+- TypeScript automatically type narrow kar dega
+
+---
+
+### **Real Example: API Responses**
+
+typescript
+
+```typescript
+interface LoadingState {
+    status: "loading";  // Discriminant
+}
+
+interface SuccessState {
+    status: "success";  // Discriminant
+    data: any;
+}
+
+interface ErrorState {
+    status: "error";    // Discriminant
+    error: string;
+}
+
+type ApiState = LoadingState | SuccessState | ErrorState;
+
+function renderUI(state: ApiState) {
+    switch (state.status) {
+        case "loading":
+            // state is LoadingState
+            return "Loading...";
+            
+        case "success":
+            // state is SuccessState
+            return `Data: ${state.data}`;
+            
+        case "error":
+            // state is ErrorState
+            return `Error: ${state.error}`;
+    }
+}
+
+// Usage
+let currentState: ApiState = { status: "loading" };
+console.log(renderUI(currentState));  // "Loading..."
+
+currentState = { status: "success", data: { user: "Rahul" } };
+console.log(renderUI(currentState));  // "Data: [object Object]"
+
+currentState = { status: "error", error: "Network failed" };
+console.log(renderUI(currentState));  // "Error: Network failed"
+```
+
+---
+
+### **Exhaustiveness Checking**
+
+**Ensure sab cases handle kiye:**
+
+typescript
+
+```typescript
+interface Circle {
+    kind: "circle";
+    radius: number;
+}
+
+interface Square {
+    kind: "square";
+    sideLength: number;
+}
+
+interface Rectangle {
+    kind: "rectangle";
+    width: number;
+    height: number;
+}
+
+type Shape = Circle | Square | Rectangle;
+
+function getArea(shape: Shape): number {
+    switch (shape.kind) {
+        case "circle":
+            return Math.PI * shape.radius ** 2;
+        case "square":
+            return shape.sideLength ** 2;
+        // ❌ Rectangle case missing!
+        default:
+            const _exhaustiveCheck: never = shape;
+            return _exhaustiveCheck;
+    }
+}
+```
+
+**Agar Rectangle case nahi likha to error:**
+```
+Type 'Rectangle' is not assignable to type 'never'
+```
+
+**Ye ensure karta hai ki tum koi case miss na karo!**
+
+---
+
+### **Real Example: Payment Methods**
+
+typescript
+
+```typescript
+interface CashPayment {
+    method: "cash";
+    amount: number;
+}
+
+interface CardPayment {
+    method: "card";
+    cardNumber: string;
+    amount: number;
+}
+
+interface UPIPayment {
+    method: "upi";
+    upiId: string;
+    amount: number;
+}
+
+type Payment = CashPayment | CardPayment | UPIPayment;
+
+function processPayment(payment: Payment): string {
+    switch (payment.method) {
+        case "cash":
+            return `Cash payment of ₹${payment.amount}`;
+            
+        case "card":
+            return `Card payment of ₹${payment.amount} from ${payment.cardNumber}`;
+            
+        case "upi":
+            return `UPI payment of ₹${payment.amount} to ${payment.upiId}`;
+            
+        default:
+            const _exhaustive: never = payment;
+            return _exhaustive;
+    }
+}
+
+// Usage
+let payment1: Payment = { method: "cash", amount: 500 };
+console.log(processPayment(payment1));
+
+let payment2: Payment = { method: "card", cardNumber: "1234-5678", amount: 1000 };
+console.log(processPayment(payment2));
+
+let payment3: Payment = { method: "upi", upiId: "rahul@upi", amount: 750 };
+console.log(processPayment(payment3));
+```
+
+---
+
+
+**Kya seekha:**
+
+- ✅ Type Alias vs Interface (detail comparison)
+- ✅ Union Types (`|`) - ya to ye ya wo
+- ✅ Intersection Types (`&`) - ye bhi aur wo bhi
+- ✅ Type Guards - runtime type checking
+- ✅ Discriminated Unions - smart pattern

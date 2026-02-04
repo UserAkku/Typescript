@@ -1,0 +1,1225 @@
+# **PART 10: Modules & Namespaces - Code Organization 📦**
+
+## 10.1 Modules Kya Hain? (Concept Clear Karo)
+
+### **Problem: Global Scope Pollution**
+
+**Pehle (without modules):**
+
+html
+
+```html
+<!-- index.html -->
+<script src="math.js"></script>
+<script src="string.js"></script>
+<script src="app.js"></script>
+```
+
+javascript
+
+```javascript
+// math.js
+function add(a, b) {
+    return a + b;
+}
+
+// string.js  
+function add(str1, str2) {  // ❌ Name collision!
+    return str1 + str2;
+}
+
+// app.js
+console.log(add(5, 10));  // Kaunsa add? 😕
+```
+
+**Problems:**
+
+- Sab functions global scope mein
+- Name collisions
+- Dependencies clear nahi
+- Order matter karta hai (script tags ka)
+
+---
+
+### **Solution: Modules**
+
+**Module = Self-contained file with its own scope**
+
+typescript
+
+```typescript
+// math.ts
+export function add(a: number, b: number): number {
+    return a + b;
+}
+
+export function subtract(a: number, b: number): number {
+    return a - b;
+}
+
+// string.ts
+export function add(str1: string, str2: string): string {
+    return str1 + str2;
+}
+
+// app.ts
+import { add as mathAdd } from './math';
+import { add as stringAdd } from './string';
+
+console.log(mathAdd(5, 10));        // 15
+console.log(stringAdd("Hello", " World"));  // "Hello World"
+```
+
+**Benefits:**
+
+- ✅ Har file ka apna scope
+- ✅ Explicit imports/exports
+- ✅ No name collisions
+- ✅ Better organization
+- ✅ Tree shaking (unused code remove)
+
+---
+
+## 10.2 Export - Code Ko Bahar Bhejo 📤
+
+### **Named Exports - Multiple Things Export Karo**
+
+#### **Method 1: Inline Export**
+
+typescript
+
+```typescript
+// utils.ts
+export const PI = 3.14159;
+
+export function square(x: number): number {
+    return x * x;
+}
+
+export class Calculator {
+    add(a: number, b: number): number {
+        return a + b;
+    }
+}
+
+export interface User {
+    id: number;
+    name: string;
+}
+
+export type ID = string | number;
+```
+
+---
+
+#### **Method 2: Export List (Preferred)**
+
+typescript
+
+```typescript
+// utils.ts
+const PI = 3.14159;
+
+function square(x: number): number {
+    return x * x;
+}
+
+class Calculator {
+    add(a: number, b: number): number {
+        return a + b;
+    }
+}
+
+interface User {
+    id: number;
+    name: string;
+}
+
+type ID = string | number;
+
+// End mein sab export karo
+export { PI, square, Calculator, User, ID };
+```
+
+**Why better?**
+
+- Code clean rahta hai
+- Ek jagah pe sab exports dikh rahe hain
+- Easy to maintain
+
+---
+
+#### **Method 3: Export with Alias**
+
+typescript
+
+```typescript
+// math.ts
+function addNumbers(a: number, b: number): number {
+    return a + b;
+}
+
+function multiplyNumbers(a: number, b: number): number {
+    return a * b;
+}
+
+// Different names se export karo
+export { 
+    addNumbers as add, 
+    multiplyNumbers as multiply 
+};
+```
+
+---
+
+### **Default Export - Ek Main Thing Export Karo**
+
+typescript
+
+```typescript
+// User.ts
+export default class User {
+    constructor(
+        public id: number,
+        public name: string
+    ) {}
+}
+
+// Calculator.ts
+export default function calculate(a: number, b: number): number {
+    return a + b;
+}
+
+// config.ts
+const config = {
+    apiUrl: "https://api.example.com",
+    timeout: 5000
+};
+
+export default config;
+```
+
+**Rules:**
+
+- File mein **sirf ek default export**
+- Import karte waqt koi bhi naam de sakte ho
+
+---
+
+### **Named + Default Export Together**
+
+typescript
+
+```typescript
+// logger.ts
+
+// Default export
+export default class Logger {
+    log(message: string): void {
+        console.log(message);
+    }
+}
+
+// Named exports
+export const LOG_LEVELS = {
+    INFO: 'info',
+    WARN: 'warn',
+    ERROR: 'error'
+};
+
+export function formatMessage(message: string): string {
+    return `[${new Date().toISOString()}] ${message}`;
+}
+```
+
+---
+
+## 10.3 Import - Code Ko Andar Lao 📥
+
+### **Named Imports**
+
+typescript
+
+```typescript
+// Single import
+import { add } from './math';
+
+// Multiple imports
+import { add, subtract, multiply } from './math';
+
+// Import with alias
+import { add as sum } from './math';
+
+// Import everything as namespace
+import * as MathUtils from './math';
+
+console.log(MathUtils.add(5, 10));
+console.log(MathUtils.subtract(10, 5));
+```
+
+---
+
+### **Default Imports**
+
+typescript
+
+```typescript
+// Default import - any name
+import User from './User';
+import MyUser from './User';     // ✅ Different name, same import
+import Person from './User';     // ✅ This also works
+
+// Usage
+let user1 = new User(1, "Rahul");
+let user2 = new MyUser(2, "Simran");
+```
+
+---
+
+### **Mixed Imports (Default + Named)**
+
+typescript
+
+```typescript
+// logger.ts exports both default and named
+
+// Import both
+import Logger, { LOG_LEVELS, formatMessage } from './logger';
+
+// Usage
+let logger = new Logger();
+logger.log(formatMessage("Hello"));
+console.log(LOG_LEVELS.INFO);
+```
+
+---
+
+### **Import Types Only (Type-only Import)**
+
+typescript
+
+```typescript
+// types.ts
+export interface User {
+    id: number;
+    name: string;
+}
+
+export type ID = string | number;
+
+// app.ts - Type-only import
+import type { User, ID } from './types';
+
+// ✅ Can use in type annotations
+let user: User = { id: 1, name: "Rahul" };
+let userId: ID = "abc123";
+
+// ❌ Cannot use as value
+// let x = User;  // Error!
+```
+
+**Why type-only import?**
+
+- Compile hone ke baad completely remove ho jata hai
+- Bundle size chota
+- Make it clear ye sirf types ke liye hai
+
+---
+
+### **Re-exporting - Barrel Pattern**
+
+typescript
+
+```typescript
+// models/User.ts
+export interface User {
+    id: number;
+    name: string;
+}
+
+// models/Product.ts
+export interface Product {
+    id: number;
+    title: string;
+}
+
+// models/Order.ts
+export interface Order {
+    id: number;
+    userId: number;
+}
+
+// models/index.ts (Barrel file)
+export { User } from './User';
+export { Product } from './Product';
+export { Order } from './Order';
+
+// OR shorthand
+export * from './User';
+export * from './Product';
+export * from './Order';
+
+// Now import from one place
+// app.ts
+import { User, Product, Order } from './models';
+```
+
+**Benefits:**
+
+- Clean imports
+- Single entry point
+- Easy to reorganize
+
+---
+
+## 10.4 Module Resolution - TypeScript File Kaise Dhundhta Hai 🔍
+
+### **Relative Import vs Non-relative Import**
+
+#### **Relative Import (starts with ./ or ../)**
+
+typescript
+
+```typescript
+// Same directory
+import { User } from './User';
+import { Product } from './Product';
+
+// Parent directory
+import { Utils } from '../utils';
+
+// Nested
+import { Logger } from '../../services/Logger';
+```
+
+**TypeScript exactly wahan se file dhundhta hai jahan path point kar raha hai**
+
+---
+
+#### **Non-relative Import (no ./ or ../)**
+
+typescript
+
+```typescript
+// From node_modules
+import React from 'react';
+import axios from 'axios';
+import lodash from 'lodash';
+
+// From configured paths (tsconfig.json)
+import { User } from '@models/User';
+import { API } from '@services/api';
+```
+
+**TypeScript node_modules ya configured paths mein dhundhta hai**
+
+---
+
+### **Module Resolution Strategy**
+
+#### **Strategy 1: Classic (Old, avoid)**
+
+typescript
+
+```typescript
+// import { User } from './User';
+
+// Search order:
+// 1. ./User.ts
+// 2. ./User.d.ts
+```
+
+---
+
+#### **Strategy 2: Node (Modern, recommended)**
+
+typescript
+
+```typescript
+// import { User } from './User';
+
+// Search order:
+// 1. ./User.ts
+// 2. ./User.tsx
+// 3. ./User.d.ts
+// 4. ./User/package.json (main field)
+// 5. ./User/index.ts
+// 6. ./User/index.tsx
+// 7. ./User/index.d.ts
+```
+
+**tsconfig.json mein set karo:**
+
+json
+
+```json
+{
+  "compilerOptions": {
+    "moduleResolution": "node"
+  }
+}
+```
+
+---
+
+### **Path Mapping - Aliases Banao**
+
+json
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "@models/*": ["models/*"],
+      "@services/*": ["services/*"],
+      "@utils/*": ["utils/*"],
+      "@components/*": ["components/*"]
+    }
+  }
+}
+```
+
+**Ab clean imports:**
+
+typescript
+
+```typescript
+// ❌ Before - ugly paths
+import { User } from '../../../models/User';
+import { API } from '../../../services/api';
+import { formatDate } from '../../../utils/date';
+
+// ✅ After - clean paths
+import { User } from '@models/User';
+import { API } from '@services/api';
+import { formatDate } from '@utils/date';
+```
+
+---
+
+## 10.5 Declaration Files (.d.ts) - Type Definitions 📜
+
+### **Declaration File Kya Hai?**
+
+**Real scenario:**
+
+Tumne JavaScript library use ki (example: jQuery). TypeScript ko pata nahi ki jQuery mein kya hai:
+
+typescript
+
+```typescript
+// ❌ Error: Cannot find name '$'
+$('#button').click(() => {
+    console.log('Clicked!');
+});
+```
+
+**Solution: Declaration file (.d.ts)**
+
+Declaration file TypeScript ko batati hai:
+
+- Library mein kya available hai
+- Types kya hain
+- **Actual implementation nahi**, sirf type information
+
+---
+
+### **Manual Declaration File**
+
+typescript
+
+```typescript
+// myLibrary.js (JavaScript file)
+function greet(name) {
+    return `Hello, ${name}!`;
+}
+
+function add(a, b) {
+    return a + b;
+}
+
+module.exports = { greet, add };
+```
+
+typescript
+
+```typescript
+// myLibrary.d.ts (Declaration file)
+export function greet(name: string): string;
+export function add(a: number, b: number): number;
+```
+
+typescript
+
+```typescript
+// app.ts (TypeScript file)
+import { greet, add } from './myLibrary';
+
+greet("Rahul");  // ✅ TypeScript knows the type!
+add(5, 10);      // ✅ Type-safe
+```
+
+---
+
+### **Automatic Declaration Generation**
+
+json
+
+```json
+// tsconfig.json
+{
+  "compilerOptions": {
+    "declaration": true,          // Generate .d.ts files
+    "declarationMap": true,       // Generate source maps
+    "outDir": "./dist"
+  }
+}
+```
+
+typescript
+
+```typescript
+// src/math.ts
+export function add(a: number, b: number): number {
+    return a + b;
+}
+
+export class Calculator {
+    multiply(a: number, b: number): number {
+        return a * b;
+    }
+}
+```
+
+**After compilation:**
+
+typescript
+
+```typescript
+// dist/math.d.ts (automatically generated)
+export declare function add(a: number, b: number): number;
+
+export declare class Calculator {
+    multiply(a: number, b: number): number;
+}
+```
+
+---
+
+### **Ambient Declarations - Global Types**
+
+typescript
+
+```typescript
+// globals.d.ts
+
+// Declare global variable
+declare const API_URL: string;
+
+// Declare global function
+declare function legacyFunction(x: number): void;
+
+// Declare global interface
+declare interface Window {
+    myCustomProperty: string;
+}
+
+// Declare module (for JS libraries without types)
+declare module 'some-js-library' {
+    export function doSomething(x: number): string;
+}
+```
+
+**Usage:**
+
+typescript
+
+```typescript
+// app.ts - No import needed!
+console.log(API_URL);  // ✅ TypeScript knows about it
+
+legacyFunction(42);    // ✅ Works
+
+window.myCustomProperty = "hello";  // ✅ Works
+
+import { doSomething } from 'some-js-library';
+doSomething(10);  // ✅ Works
+```
+
+---
+
+## 10.6 @types Packages - Pre-made Type Definitions 📚
+
+### **@types Package Kya Hai?**
+
+Popular JavaScript libraries ke liye **community-maintained type definitions**:
+
+bash
+
+```bash
+# Install library
+npm install jquery
+
+# Install types
+npm install --save-dev @types/jquery
+```
+
+**Ab TypeScript automatically types use karega:**
+
+typescript
+
+```typescript
+import $ from 'jquery';
+
+$('#button').click(() => {  // ✅ Full type safety!
+    console.log('Clicked');
+});
+```
+
+---
+
+### **Popular @types Packages**
+
+bash
+
+```bash
+# React
+npm install --save-dev @types/react @types/react-dom
+
+# Node.js
+npm install --save-dev @types/node
+
+# Express
+npm install --save-dev @types/express
+
+# Lodash
+npm install --save-dev @types/lodash
+
+# Jest
+npm install --save-dev @types/jest
+```
+
+---
+
+### **Checking if @types Available**
+
+**Method 1: Search on npm**
+
+bash
+
+```bash
+npm search @types/library-name
+```
+
+**Method 2: Check TypeSearch** Visit: <https://www.typescriptlang.org/dt/search>
+
+**Method 3: Try installing**
+
+bash
+
+```bash
+npm install --save-dev @types/library-name
+```
+
+---
+
+## 10.7 Creating Your Own Type Definitions 🛠️
+
+### **Scenario 1: Third-party JS Library (No Types)**
+
+javascript
+
+```javascript
+// my-old-library.js
+window.MyLib = {
+    init: function(config) {
+        // initialization
+    },
+    
+    getData: function(id) {
+        return { id: id, name: "Data" };
+    },
+    
+    version: "1.0.0"
+};
+```
+
+**Create declaration file:**
+
+typescript
+
+```typescript
+// my-old-library.d.ts
+
+interface MyLibConfig {
+    apiUrl: string;
+    timeout: number;
+}
+
+interface MyLibData {
+    id: number;
+    name: string;
+}
+
+interface MyLib {
+    init(config: MyLibConfig): void;
+    getData(id: number): MyLibData;
+    version: string;
+}
+
+declare global {
+    interface Window {
+        MyLib: MyLib;
+    }
+}
+
+export {};  // Make it a module
+```
+
+**Usage:**
+
+typescript
+
+```typescript
+// app.ts
+window.MyLib.init({
+    apiUrl: "https://api.example.com",
+    timeout: 5000
+});
+
+let data = window.MyLib.getData(123);
+console.log(data.name);  // ✅ Type-safe!
+```
+
+---
+
+### **Scenario 2: Module Without Types**
+
+typescript
+
+```typescript
+// my-library.d.ts
+
+declare module 'my-custom-library' {
+    // Export types
+    export interface User {
+        id: number;
+        name: string;
+    }
+    
+    // Export functions
+    export function getUser(id: number): Promise<User>;
+    export function createUser(name: string): Promise<User>;
+    
+    // Default export
+    export default class MyLibrary {
+        constructor(config: any);
+        connect(): Promise<void>;
+    }
+}
+```
+
+**Usage:**
+
+typescript
+
+```typescript
+import MyLibrary, { getUser, createUser, User } from 'my-custom-library';
+
+const lib = new MyLibrary({ apiKey: "abc" });
+await lib.connect();
+
+const user: User = await getUser(1);
+```
+
+---
+
+### **Scenario 3: Image/CSS/File Imports**
+
+typescript
+
+```typescript
+// types/assets.d.ts
+
+// Images
+declare module '*.png' {
+    const content: string;
+    export default content;
+}
+
+declare module '*.jpg' {
+    const content: string;
+    export default content;
+}
+
+declare module '*.svg' {
+    const content: string;
+    export default content;
+}
+
+// CSS/SCSS
+declare module '*.css' {
+    const content: { [className: string]: string };
+    export default content;
+}
+
+declare module '*.scss' {
+    const content: { [className: string]: string };
+    export default content;
+}
+
+// JSON
+declare module '*.json' {
+    const content: any;
+    export default content;
+}
+```
+
+**Usage:**
+
+typescript
+
+```typescript
+// app.ts
+import logo from './logo.png';  // ✅ Works
+import styles from './App.css';  // ✅ Works
+import config from './config.json';  // ✅ Works
+
+console.log(logo);  // string (URL)
+console.log(styles.container);  // string (class name)
+```
+
+---
+
+## 10.8 Triple-Slash Directives 📐
+
+### **Triple-Slash Directive Kya Hai?**
+
+**Special comments jo TypeScript compiler ko instructions dete hain**
+
+**Syntax:** `/// <directive>`
+
+---
+
+### **1. Reference Path**
+
+typescript
+
+```typescript
+/// <reference path="./types.d.ts" />
+
+// Ab types.d.ts ke types available hain
+```
+
+---
+
+### **2. Reference Types**
+
+typescript
+
+```typescript
+/// <reference types="node" />
+
+// Ab Node.js types available hain
+// console, process, Buffer, etc.
+
+console.log(process.env.NODE_ENV);
+```
+
+---
+
+### **3. Reference Library**
+
+typescript
+
+```typescript
+/// <reference lib="es2015" />
+/// <reference lib="dom" />
+
+// ES2015 aur DOM APIs available
+```
+
+---
+
+### **When to Use?**
+
+**Modern projects mein rarely use hote hain** - tsconfig.json prefer karo:
+
+json
+
+```json
+{
+  "compilerOptions": {
+    "types": ["node", "jest"],
+    "lib": ["ES2020", "DOM"]
+  }
+}
+```
+
+---
+
+## 10.9 Real-World Project Structure 🏗️
+
+### **Typical TypeScript Project**
+```
+my-project/
+├── src/
+│   ├── models/
+│   │   ├── User.ts
+│   │   ├── Product.ts
+│   │   └── index.ts          # Barrel export
+│   │
+│   ├── services/
+│   │   ├── api.ts
+│   │   ├── auth.ts
+│   │   └── index.ts
+│   │
+│   ├── utils/
+│   │   ├── date.ts
+│   │   ├── string.ts
+│   │   └── index.ts
+│   │
+│   ├── types/
+│   │   ├── global.d.ts       # Global type declarations
+│   │   ├── assets.d.ts       # Asset imports
+│   │   └── custom.d.ts       # Custom library types
+│   │
+│   └── index.ts              # Main entry
+│
+├── node_modules/
+├── dist/                     # Compiled output
+├── tsconfig.json
+├── package.json
+└── README.md
+```
+
+---
+
+### **Example Files**
+
+#### **src/models/User.ts**
+
+typescript
+
+```typescript
+export interface User {
+    id: number;
+    name: string;
+    email: string;
+    role: UserRole;
+}
+
+export enum UserRole {
+    Admin = "ADMIN",
+    User = "USER",
+    Guest = "GUEST"
+}
+
+export class UserService {
+    async getUser(id: number): Promise<User> {
+        // Implementation
+        return {} as User;
+    }
+}
+```
+
+---
+
+#### **src/models/index.ts (Barrel)**
+
+typescript
+
+```typescript
+export * from './User';
+export * from './Product';
+export * from './Order';
+
+// Now import like this:
+// import { User, Product, Order } from '@models';
+```
+
+---
+
+#### **src/types/global.d.ts**
+
+typescript
+
+```typescript
+// Global type declarations
+
+declare global {
+    interface Window {
+        API_URL: string;
+    }
+    
+    namespace NodeJS {
+        interface ProcessEnv {
+            NODE_ENV: 'development' | 'production';
+            API_KEY: string;
+        }
+    }
+}
+
+export {};
+```
+
+---
+
+#### **tsconfig.json (Complete)**
+
+json
+
+```json
+{
+  "compilerOptions": {
+    // Language & Environment
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM"],
+    "jsx": "react",
+    
+    // Modules
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    
+    // Paths
+    "baseUrl": "./src",
+    "paths": {
+      "@models/*": ["models/*"],
+      "@services/*": ["services/*"],
+      "@utils/*": ["utils/*"],
+      "@components/*": ["components/*"]
+    },
+    
+    // Emit
+    "outDir": "./dist",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": true,
+    
+    // Type Checking
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    
+    // Other
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  
+  "include": [
+    "src/**/*"
+  ],
+  
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.spec.ts"
+  ]
+}
+```
+
+---
+
+## 10.10 CommonJS vs ES Modules 🔄
+
+### **ES Modules (Modern)**
+
+typescript
+
+```typescript
+// export.ts
+export const name = "Rahul";
+export function greet() { }
+
+// import.ts
+import { name, greet } from './export';
+```
+
+**tsconfig.json:**
+
+json
+
+```json
+{
+  "compilerOptions": {
+    "module": "ESNext"  // or "ES2020", "ES6"
+  }
+}
+```
+
+---
+
+### **CommonJS (Node.js Traditional)**
+
+typescript
+
+```typescript
+// export.ts
+const name = "Rahul";
+function greet() { }
+module.exports = { name, greet };
+
+// import.ts
+const { name, greet } = require('./export');
+```
+
+**tsconfig.json:**
+
+json
+
+```json
+{
+  "compilerOptions": {
+    "module": "CommonJS"
+  }
+}
+```
+
+---
+
+### **Interop Between Both**
+
+json
+
+```json
+{
+  "compilerOptions": {
+    "esModuleInterop": true,  // ✅ Enable this!
+    "allowSyntheticDefaultImports": true
+  }
+}
+```
+
+**Ab ye dono kaam karenge:**
+
+typescript
+
+```typescript
+// ES6 style import for CommonJS module
+import express from 'express';  // ✅ Works
+
+// CommonJS style
+const express = require('express');  // ✅ Also works
+```
+
+---
+
+
+**Kya seekha?**
+
+- ✅ Modules concept
+- ✅ Import/Export patterns (sab variations)
+- ✅ Module resolution
+- ✅ Declaration files (.d.ts)
+- ✅ @types packages
+- ✅ Creating custom type definitions
+- ✅ Triple-slash directives
+- ✅ Project structure
+- ✅ ES Modules vs CommonJS

@@ -1,0 +1,1359 @@
+# **PART 8: Advanced OOP Concepts 🎓**
+
+## 8.1 Abstract Classes - Incomplete Classes 🏗️
+
+### **Abstract Class Kya Hai?**
+
+**Real life analogy:**
+
+Socho **vehicle blueprint**:
+
+- Har vehicle mein:
+  - Start karna hoga (par kaise? car alag, bike alag)
+  - Stop karna hoga (par kaise? different vehicles different way)
+  - Fuel tank hai (common property)
+
+**Abstract class = Incomplete blueprint**
+
+- Kuch cheezein define hain (complete)
+- Kuch cheezein sirf declare hain (incomplete - child classes ko complete karna padega)
+- **Direct instance nahi bana sakte**
+
+---
+
+### **Normal Class vs Abstract Class**
+
+typescript
+
+```typescript
+// Normal class - directly instance bana sakte ho
+class Vehicle {
+    start(): void {
+        console.log("Starting vehicle");
+    }
+}
+
+let v = new Vehicle();  // ✅ OK
+
+// Abstract class - directly instance NAHI bana sakte
+abstract class AbstractVehicle {
+    abstract start(): void;  // Incomplete method
+}
+
+// let v = new AbstractVehicle();  // ❌ Error: Cannot create instance of abstract class
+```
+
+---
+
+### **Abstract Class Syntax**
+
+typescript
+
+```typescript
+abstract class ClassName {
+    // Normal properties (complete)
+    property: type;
+    
+    // Normal methods (complete)
+    method(): returnType {
+        // implementation
+    }
+    
+    // Abstract methods (incomplete - NO implementation)
+    abstract abstractMethod(): returnType;
+}
+```
+
+**Rules:**
+
+1. `abstract` keyword class ke aage
+2. Abstract methods mein **sirf signature**, implementation nahi
+3. Child classes ko **sabhi abstract methods implement** karne padte hain
+4. Direct instance nahi bana sakte
+
+---
+
+### **Complete Example: Shape System**
+
+typescript
+
+```typescript
+// Abstract base class
+abstract class Shape {
+    // Normal property
+    constructor(public color: string) {}
+    
+    // Abstract methods - child classes ko implement karna PADEGA
+    abstract calculateArea(): number;
+    abstract calculatePerimeter(): number;
+    
+    // Normal method - already implemented
+    display(): void {
+        console.log(`Color: ${this.color}`);
+        console.log(`Area: ${this.calculateArea()}`);
+        console.log(`Perimeter: ${this.calculatePerimeter()}`);
+    }
+}
+
+// Child class 1: Circle
+class Circle extends Shape {
+    constructor(color: string, public radius: number) {
+        super(color);
+    }
+    
+    // MUST implement abstract methods
+    calculateArea(): number {
+        return Math.PI * this.radius ** 2;
+    }
+    
+    calculatePerimeter(): number {
+        return 2 * Math.PI * this.radius;
+    }
+}
+
+// Child class 2: Rectangle
+class Rectangle extends Shape {
+    constructor(
+        color: string,
+        public width: number,
+        public height: number
+    ) {
+        super(color);
+    }
+    
+    calculateArea(): number {
+        return this.width * this.height;
+    }
+    
+    calculatePerimeter(): number {
+        return 2 * (this.width + this.height);
+    }
+}
+
+// Usage
+let circle = new Circle("red", 5);
+circle.display();
+// Color: red
+// Area: 78.54
+// Perimeter: 31.42
+
+let rectangle = new Rectangle("blue", 10, 5);
+rectangle.display();
+// Color: blue
+// Area: 50
+// Perimeter: 30
+```
+
+**Kya hua?**
+
+- `Shape` abstract hai - incomplete
+- `calculateArea()` aur `calculatePerimeter()` abstract hain
+- Har child class (`Circle`, `Rectangle`) ko ye methods implement karne pade
+- `display()` method already complete tha, sabko mil gaya
+
+---
+
+### **Incomplete Child Class - Error!**
+
+typescript
+
+```typescript
+abstract class Animal {
+    abstract makeSound(): void;
+    abstract move(): void;
+}
+
+// ❌ Error: Dog doesn't implement all abstract methods
+class Dog extends Animal {
+    makeSound(): void {
+        console.log("Woof!");
+    }
+    // move() missing!
+}
+```
+
+**Fix:**
+
+typescript
+
+```typescript
+class Dog extends Animal {
+    makeSound(): void {
+        console.log("Woof!");
+    }
+    
+    move(): void {
+        console.log("Running on four legs");
+    }
+}
+
+let dog = new Dog();  // ✅ OK - all abstract methods implemented
+```
+
+---
+
+### **Abstract Class with Constructor**
+
+typescript
+
+```typescript
+abstract class Employee {
+    constructor(
+        public name: string,
+        public id: string
+    ) {}
+    
+    // Abstract method
+    abstract calculateSalary(): number;
+    
+    // Concrete method
+    displayInfo(): void {
+        console.log(`ID: ${this.id}`);
+        console.log(`Name: ${this.name}`);
+        console.log(`Salary: ₹${this.calculateSalary()}`);
+    }
+}
+
+class FullTimeEmployee extends Employee {
+    constructor(name: string, id: string, private monthlySalary: number) {
+        super(name, id);
+    }
+    
+    calculateSalary(): number {
+        return this.monthlySalary;
+    }
+}
+
+class PartTimeEmployee extends Employee {
+    constructor(
+        name: string,
+        id: string,
+        private hourlyRate: number,
+        private hoursWorked: number
+    ) {
+        super(name, id);
+    }
+    
+    calculateSalary(): number {
+        return this.hourlyRate * this.hoursWorked;
+    }
+}
+
+let fullTime = new FullTimeEmployee("Rahul", "FT001", 50000);
+fullTime.displayInfo();
+// ID: FT001
+// Name: Rahul
+// Salary: ₹50000
+
+let partTime = new PartTimeEmployee("Simran", "PT001", 500, 80);
+partTime.displayInfo();
+// ID: PT001
+// Name: Simran
+// Salary: ₹40000
+```
+
+---
+
+### **Abstract Class Kab Use Karein?**
+
+<table>
+<tbody><tr><th colspan="1" rowspan="1"><p>Use Case</p></th><th colspan="1" rowspan="1"><p>Example</p></th></tr><tr><td colspan="1" rowspan="1"><p>Common behavior + mandatory variations</p></td><td colspan="1" rowspan="1"><p>Shape (area calculation varies)</p></td></tr><tr><td colspan="1" rowspan="1"><p>Base class with some implementation</p></td><td colspan="1" rowspan="1"><p>Employee (common fields, salary varies)</p></td></tr><tr><td colspan="1" rowspan="1"><p>Force implementation in children</p></td><td colspan="1" rowspan="1"><p>Payment methods (all must have process())</p></td></tr><tr><td colspan="1" rowspan="1"><p>Shared code + flexibility</p></td><td colspan="1" rowspan="1"><p>Database adapters (connect varies, query common)</p></td></tr></tbody>
+</table>
+
+---
+
+### **Real Example: Database Adapter**
+
+typescript
+
+```typescript
+abstract class DatabaseAdapter {
+    protected connectionString: string;
+    
+    constructor(connectionString: string) {
+        this.connectionString = connectionString;
+    }
+    
+    // Abstract - har database different connect karta hai
+    abstract connect(): Promise<void>;
+    abstract disconnect(): Promise<void>;
+    
+    // Concrete - logging same for all
+    protected log(message: string): void {
+        console.log(`[${new Date().toISOString()}] ${message}`);
+    }
+    
+    // Abstract - query execution varies
+    abstract query(sql: string): Promise<any>;
+}
+
+class MySQLAdapter extends DatabaseAdapter {
+    async connect(): Promise<void> {
+        this.log("Connecting to MySQL...");
+        // MySQL-specific connection logic
+        this.log("MySQL connected!");
+    }
+    
+    async disconnect(): Promise<void> {
+        this.log("Disconnecting from MySQL...");
+        // MySQL-specific disconnection
+    }
+    
+    async query(sql: string): Promise<any> {
+        this.log(`Executing MySQL query: ${sql}`);
+        // MySQL-specific query execution
+        return [];
+    }
+}
+
+class PostgreSQLAdapter extends DatabaseAdapter {
+    async connect(): Promise<void> {
+        this.log("Connecting to PostgreSQL...");
+        // PostgreSQL-specific connection logic
+        this.log("PostgreSQL connected!");
+    }
+    
+    async disconnect(): Promise<void> {
+        this.log("Disconnecting from PostgreSQL...");
+    }
+    
+    async query(sql: string): Promise<any> {
+        this.log(`Executing PostgreSQL query: ${sql}`);
+        // PostgreSQL-specific query execution
+        return [];
+    }
+}
+
+// Usage
+async function useDatabase(db: DatabaseAdapter) {
+    await db.connect();
+    await db.query("SELECT * FROM users");
+    await db.disconnect();
+}
+
+let mysql = new MySQLAdapter("mysql://localhost");
+let postgres = new PostgreSQLAdapter("postgresql://localhost");
+
+useDatabase(mysql);
+useDatabase(postgres);
+```
+
+---
+
+## 8.2 Implementing Interfaces in Classes 🔌
+
+### **Interface vs Abstract Class - Farak Kya Hai?**
+
+<table>
+<tbody><tr><th colspan="1" rowspan="1"><p>Feature</p></th><th colspan="1" rowspan="1"><p>Interface</p></th><th colspan="1" rowspan="1"><p>Abstract Class</p></th></tr><tr><td colspan="1" rowspan="1"><p><strong>Implementation</strong></p></td><td colspan="1" rowspan="1"><p>Kuch bhi implement nahi</p></td><td colspan="1" rowspan="1"><p>Kuch implement ho sakta hai</p></td></tr><tr><td colspan="1" rowspan="1"><p><strong>Multiple</strong></p></td><td colspan="1" rowspan="1"><p>Multiple interfaces implement kar sakte ho</p></td><td colspan="1" rowspan="1"><p>Ek hi class extend kar sakte ho</p></td></tr><tr><td colspan="1" rowspan="1"><p><strong>Constructor</strong></p></td><td colspan="1" rowspan="1"><p>Nahi ho sakta</p></td><td colspan="1" rowspan="1"><p>Ho sakta hai</p></td></tr><tr><td colspan="1" rowspan="1"><p><strong>Access Modifiers</strong></p></td><td colspan="1" rowspan="1"><p>Sab public (by default)</p></td><td colspan="1" rowspan="1"><p>public, protected, private</p></td></tr><tr><td colspan="1" rowspan="1"><p><strong>Use case</strong></p></td><td colspan="1" rowspan="1"><p>"Can-do" relationship</p></td><td colspan="1" rowspan="1"><p>"Is-a" relationship</p></td></tr></tbody>
+</table>
+
+**Simple rule:**
+
+- **Interface** = Contract (ye sab methods hone chahiye)
+- **Abstract Class** = Partial implementation (kuch ready, kuch khud karo)
+
+---
+
+### **Interface Implementation Syntax**
+
+typescript
+
+```typescript
+interface InterfaceName {
+    property: type;
+    method(): returnType;
+}
+
+class ClassName implements InterfaceName {
+    // Interface ki sab cheezein implement karo
+    property: type;
+    
+    method(): returnType {
+        // implementation
+    }
+}
+```
+
+---
+
+### **Basic Example**
+
+typescript
+
+```typescript
+interface Printable {
+    print(): void;
+}
+
+class Document implements Printable {
+    constructor(public content: string) {}
+    
+    print(): void {
+        console.log("Printing document:");
+        console.log(this.content);
+    }
+}
+
+class Photo implements Printable {
+    constructor(public filename: string) {}
+    
+    print(): void {
+        console.log(`Printing photo: ${this.filename}`);
+    }
+}
+
+function printItem(item: Printable): void {
+    item.print();
+}
+
+let doc = new Document("Hello World");
+let photo = new Photo("vacation.jpg");
+
+printItem(doc);    // "Printing document: Hello World"
+printItem(photo);  // "Printing photo: vacation.jpg"
+```
+
+---
+
+### **Multiple Interfaces Implementation**
+
+typescript
+
+```typescript
+interface Flyable {
+    fly(): void;
+    altitude: number;
+}
+
+interface Swimmable {
+    swim(): void;
+    depth: number;
+}
+
+interface Walkable {
+    walk(): void;
+    speed: number;
+}
+
+// Duck can fly, swim, and walk!
+class Duck implements Flyable, Swimmable, Walkable {
+    altitude: number = 0;
+    depth: number = 0;
+    speed: number = 0;
+    
+    fly(): void {
+        this.altitude = 100;
+        console.log(`Flying at ${this.altitude} feet`);
+    }
+    
+    swim(): void {
+        this.depth = 5;
+        console.log(`Swimming at ${this.depth} meters depth`);
+    }
+    
+    walk(): void {
+        this.speed = 2;
+        console.log(`Walking at ${this.speed} km/h`);
+    }
+    
+    quack(): void {
+        console.log("Quack quack!");
+    }
+}
+
+let duck = new Duck();
+duck.fly();
+duck.swim();
+duck.walk();
+duck.quack();
+```
+
+---
+
+### **Interface + Inheritance**
+
+typescript
+
+```typescript
+// Base class
+class Animal {
+    constructor(public name: string) {}
+    
+    eat(): void {
+        console.log(`${this.name} is eating`);
+    }
+}
+
+// Interface
+interface Pet {
+    play(): void;
+    owner: string;
+}
+
+// Class extends Animal AND implements Pet
+class Dog extends Animal implements Pet {
+    owner: string;
+    
+    constructor(name: string, owner: string) {
+        super(name);
+        this.owner = owner;
+    }
+    
+    // From Pet interface
+    play(): void {
+        console.log(`${this.name} is playing with ${this.owner}`);
+    }
+    
+    // Own method
+    bark(): void {
+        console.log("Woof!");
+    }
+}
+
+let dog = new Dog("Tommy", "Rahul");
+dog.eat();   // From Animal
+dog.play();  // From Pet interface
+dog.bark();  // Own method
+```
+
+---
+
+### **Real Example: Payment System**
+
+typescript
+
+```typescript
+// Payment interface
+interface PaymentMethod {
+    processPayment(amount: number): boolean;
+    refund(transactionId: string, amount: number): boolean;
+}
+
+// Base class for common functionality
+abstract class PaymentBase {
+    protected transactionHistory: string[] = [];
+    
+    protected logTransaction(message: string): void {
+        this.transactionHistory.push(message);
+        console.log(`[Transaction] ${message}`);
+    }
+}
+
+// Credit Card payment
+class CreditCardPayment extends PaymentBase implements PaymentMethod {
+    constructor(
+        private cardNumber: string,
+        private cvv: string,
+        private expiryDate: string
+    ) {
+        super();
+    }
+    
+    processPayment(amount: number): boolean {
+        // Card validation logic
+        if (this.validateCard()) {
+            this.logTransaction(`Charged ₹${amount} to card ${this.maskCardNumber()}`);
+            return true;
+        }
+        return false;
+    }
+    
+    refund(transactionId: string, amount: number): boolean {
+        this.logTransaction(`Refunded ₹${amount} to card (Txn: ${transactionId})`);
+        return true;
+    }
+    
+    private validateCard(): boolean {
+        // Validation logic
+        return true;
+    }
+    
+    private maskCardNumber(): string {
+        return `****-****-****-${this.cardNumber.slice(-4)}`;
+    }
+}
+
+// UPI payment
+class UPIPayment extends PaymentBase implements PaymentMethod {
+    constructor(private upiId: string) {
+        super();
+    }
+    
+    processPayment(amount: number): boolean {
+        this.logTransaction(`Sent ₹${amount} to ${this.upiId}`);
+        return true;
+    }
+    
+    refund(transactionId: string, amount: number): boolean {
+        this.logTransaction(`Refunded ₹${amount} to ${this.upiId} (Txn: ${transactionId})`);
+        return true;
+    }
+}
+
+// Cash payment
+class CashPayment extends PaymentBase implements PaymentMethod {
+    processPayment(amount: number): boolean {
+        this.logTransaction(`Received ₹${amount} in cash`);
+        return true;
+    }
+    
+    refund(transactionId: string, amount: number): boolean {
+        this.logTransaction(`Refunded ₹${amount} in cash (Txn: ${transactionId})`);
+        return true;
+    }
+}
+
+// Payment processor - works with any PaymentMethod
+class PaymentProcessor {
+    processOrder(paymentMethod: PaymentMethod, amount: number): void {
+        console.log(`Processing payment of ₹${amount}...`);
+        
+        if (paymentMethod.processPayment(amount)) {
+            console.log("Payment successful!");
+        } else {
+            console.log("Payment failed!");
+        }
+    }
+}
+
+// Usage
+let processor = new PaymentProcessor();
+
+let card = new CreditCardPayment("1234567890123456", "123", "12/25");
+processor.processOrder(card, 1500);
+
+let upi = new UPIPayment("rahul@upi");
+processor.processOrder(upi, 2500);
+
+let cash = new CashPayment();
+processor.processOrder(cash, 500);
+```
+
+---
+
+## 8.3 Polymorphism - Ek Interface, Multiple Forms 🎭
+
+### **Polymorphism Kya Hai?**
+
+**Real life:**
+
+- **Remote control** (interface)
+  - TV ke liye - channels change karta hai
+  - AC ke liye - temperature change karta hai
+  - Music system ke liye - volume change karta hai
+
+**Same button (interface), different behavior (implementation)**
+
+---
+
+### **TypeScript Mein Polymorphism**
+
+typescript
+
+```typescript
+// Common interface
+interface Animal {
+    makeSound(): void;
+    move(): void;
+}
+
+class Dog implements Animal {
+    makeSound(): void {
+        console.log("Woof! Woof!");
+    }
+    
+    move(): void {
+        console.log("Running on four legs");
+    }
+}
+
+class Bird implements Animal {
+    makeSound(): void {
+        console.log("Chirp! Chirp!");
+    }
+    
+    move(): void {
+        console.log("Flying in the sky");
+    }
+}
+
+class Fish implements Animal {
+    makeSound(): void {
+        console.log("Blub! Blub!");
+    }
+    
+    move(): void {
+        console.log("Swimming in water");
+    }
+}
+
+// Polymorphic function - works with ANY Animal
+function interactWithAnimal(animal: Animal): void {
+    console.log("--- Interacting with animal ---");
+    animal.makeSound();  // Different for each animal
+    animal.move();       // Different for each animal
+}
+
+// Usage
+let dog = new Dog();
+let bird = new Bird();
+let fish = new Fish();
+
+interactWithAnimal(dog);   // Woof! Running
+interactWithAnimal(bird);  // Chirp! Flying
+interactWithAnimal(fish);  // Blub! Swimming
+```
+
+**Key point:**
+
+- `interactWithAnimal` ko bas `Animal` interface chahiye
+- Actual implementation kya hai, wo runtime par decide hota hai
+- Ek function, multiple behaviors
+
+---
+
+### **Polymorphism with Arrays**
+
+typescript
+
+```typescript
+interface Shape {
+    calculateArea(): number;
+    name: string;
+}
+
+class Circle implements Shape {
+    name = "Circle";
+    constructor(private radius: number) {}
+    
+    calculateArea(): number {
+        return Math.PI * this.radius ** 2;
+    }
+}
+
+class Rectangle implements Shape {
+    name = "Rectangle";
+    constructor(private width: number, private height: number) {}
+    
+    calculateArea(): number {
+        return this.width * this.height;
+    }
+}
+
+class Triangle implements Shape {
+    name = "Triangle";
+    constructor(private base: number, private height: number) {}
+    
+    calculateArea(): number {
+        return 0.5 * this.base * this.height;
+    }
+}
+
+// Array of different shapes
+let shapes: Shape[] = [
+    new Circle(5),
+    new Rectangle(10, 20),
+    new Triangle(10, 15),
+    new Circle(3)
+];
+
+// Calculate total area
+let totalArea = 0;
+for (let shape of shapes) {
+    console.log(`${shape.name} area: ${shape.calculateArea()}`);
+    totalArea += shape.calculateArea();
+}
+console.log(`Total area: ${totalArea}`);
+```
+
+---
+
+### **Real Example: File System**
+
+typescript
+
+```typescript
+interface FileSystemItem {
+    name: string;
+    getSize(): number;
+    display(indent: string): void;
+}
+
+class File implements FileSystemItem {
+    constructor(
+        public name: string,
+        private size: number
+    ) {}
+    
+    getSize(): number {
+        return this.size;
+    }
+    
+    display(indent: string = ""): void {
+        console.log(`${indent}📄 ${this.name} (${this.size} KB)`);
+    }
+}
+
+class Folder implements FileSystemItem {
+    public name: string;
+    private items: FileSystemItem[] = [];
+    
+    constructor(name: string) {
+        this.name = name;
+    }
+    
+    add(item: FileSystemItem): void {
+        this.items.push(item);
+    }
+    
+    getSize(): number {
+        return this.items.reduce((total, item) => total + item.getSize(), 0);
+    }
+    
+    display(indent: string = ""): void {
+        console.log(`${indent}📁 ${this.name} (${this.getSize()} KB)`);
+        for (let item of this.items) {
+            item.display(indent + "  ");
+        }
+    }
+}
+
+// Create file system
+let root = new Folder("root");
+
+let documents = new Folder("Documents");
+documents.add(new File("resume.pdf", 250));
+documents.add(new File("letter.docx", 150));
+
+let photos = new Folder("Photos");
+photos.add(new File("vacation.jpg", 2048));
+photos.add(new File("family.jpg", 1536));
+
+root.add(documents);
+root.add(photos);
+root.add(new File("readme.txt", 5));
+
+// Display entire structure
+root.display();
+// 📁 root (3989 KB)
+//   📁 Documents (400 KB)
+//     📄 resume.pdf (250 KB)
+//     📄 letter.docx (150 KB)
+//   📁 Photos (3584 KB)
+//     📄 vacation.jpg (2048 KB)
+//     📄 family.jpg (1536 KB)
+//   📄 readme.txt (5 KB)
+```
+
+---
+
+## 8.4 Real-World Example: E-commerce System 🛒
+
+Chalo ab sab concepts ko ek saath use karke real system banate hain:
+
+typescript
+
+```typescript
+// ============ INTERFACES ============
+
+interface Identifiable {
+    id: string;
+}
+
+interface Timestamped {
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+interface Priceable {
+    getPrice(): number;
+}
+
+// ============ ABSTRACT BASE CLASS ============
+
+abstract class Entity implements Identifiable, Timestamped {
+    public id: string;
+    public createdAt: Date;
+    public updatedAt: Date;
+    
+    constructor(id: string) {
+        this.id = id;
+        this.createdAt = new Date();
+        this.updatedAt = new Date();
+    }
+    
+    protected touch(): void {
+        this.updatedAt = new Date();
+    }
+}
+
+// ============ PRODUCT CLASSES ============
+
+abstract class Product extends Entity implements Priceable {
+    constructor(
+        id: string,
+        public name: string,
+        public description: string,
+        protected basePrice: number
+    ) {
+        super(id);
+    }
+    
+    // Abstract - har product type different calculate karega
+    abstract getPrice(): number;
+    
+    displayInfo(): void {
+        console.log(`${this.name} - ₹${this.getPrice()}`);
+        console.log(`  ${this.description}`);
+    }
+}
+
+class PhysicalProduct extends Product {
+    constructor(
+        id: string,
+        name: string,
+        description: string,
+        basePrice: number,
+        private weight: number,
+        private shippingCost: number
+    ) {
+        super(id, name, description, basePrice);
+    }
+    
+    getPrice(): number {
+        return this.basePrice + this.shippingCost;
+    }
+    
+    getWeight(): number {
+        return this.weight;
+    }
+}
+
+class DigitalProduct extends Product {
+    constructor(
+        id: string,
+        name: string,
+        description: string,
+        basePrice: number,
+        private downloadUrl: string,
+        private fileSize: number
+    ) {
+        super(id, name, description, basePrice);
+    }
+    
+    getPrice(): number {
+        // No shipping for digital products
+        return this.basePrice;
+    }
+    
+    getDownloadUrl(): string {
+        return this.downloadUrl;
+    }
+}
+
+// ============ DISCOUNT SYSTEM ============
+
+interface Discount {
+    apply(price: number): number;
+    getDescription(): string;
+}
+
+class PercentageDiscount implements Discount {
+    constructor(private percentage: number) {}
+    
+    apply(price: number): number {
+        return price * (1 - this.percentage / 100);
+    }
+    
+    getDescription(): string {
+        return `${this.percentage}% off`;
+    }
+}
+
+class FixedDiscount implements Discount {
+    constructor(private amount: number) {}
+    
+    apply(price: number): number {
+        return Math.max(0, price - this.amount);
+    }
+    
+    getDescription(): string {
+        return `₹${this.amount} off`;
+    }
+}
+
+// ============ CART SYSTEM ============
+
+class CartItem {
+    constructor(
+        public product: Product,
+        public quantity: number,
+        public discount?: Discount
+    ) {}
+    
+    getTotalPrice(): number {
+        let price = this.product.getPrice() * this.quantity;
+        if (this.discount) {
+            price = this.discount.apply(price);
+        }
+        return price;
+    }
+    
+    display(): void {
+        console.log(`  ${this.product.name} x${this.quantity}`);
+        console.log(`    Unit Price: ₹${this.product.getPrice()}`);
+        if (this.discount) {
+            console.log(`    Discount: ${this.discount.getDescription()}`);
+        }
+        console.log(`    Total: ₹${this.getTotalPrice()}`);
+    }
+}
+
+class ShoppingCart {
+    private items: CartItem[] = [];
+    
+    addItem(product: Product, quantity: number, discount?: Discount): void {
+        let existingItem = this.items.find(item => item.product.id === product.id);
+        
+        if (existingItem) {
+            existingItem.quantity += quantity;
+        } else {
+            this.items.push(new CartItem(product, quantity, discount));
+        }
+    }
+    
+    removeItem(productId: string): void {
+        this.items = this.items.filter(item => item.product.id !== productId);
+    }
+    
+    getTotalPrice(): number {
+        return this.items.reduce((total, item) => total + item.getTotalPrice(), 0);
+    }
+    
+    display(): void {
+        console.log("=== Shopping Cart ===");
+        if (this.items.length === 0) {
+            console.log("Cart is empty");
+            return;
+        }
+        
+        for (let item of this.items) {
+            item.display();
+        }
+        
+        console.log(`\nTotal: ₹${this.getTotalPrice()}`);
+    }
+}
+
+// ============ USAGE ============
+
+// Create products
+let laptop = new PhysicalProduct(
+    "P001",
+    "Dell Laptop",
+    "15-inch, 8GB RAM, 512GB SSD",
+    45000,
+    2.5,  // weight in kg
+    500   // shipping cost
+);
+
+let ebook = new DigitalProduct(
+    "P002",
+    "TypeScript Guide",
+    "Complete TypeScript tutorial",
+    299,
+    "https://example.com/download/typescript.pdf",
+    5  // file size in MB
+);
+
+let mouse = new PhysicalProduct(
+    "P003",
+    "Wireless Mouse",
+    "Bluetooth mouse with ergonomic design",
+    799,
+    0.2,
+    50
+);
+
+// Create cart
+let cart = new ShoppingCart();
+
+// Add items with discounts
+cart.addItem(laptop, 1, new PercentageDiscount(10));  // 10% off
+cart.addItem(ebook, 2);  // No discount
+cart.addItem(mouse, 1, new FixedDiscount(100));  // ₹100 off
+
+// Display cart
+cart.display();
+
+// Output:
+// === Shopping Cart ===
+//   Dell Laptop x1
+//     Unit Price: ₹45500
+//     Discount: 10% off
+//     Total: ₹40950
+//   TypeScript Guide x2
+//     Unit Price: ₹299
+//     Total: ₹598
+//   Wireless Mouse x1
+//     Unit Price: ₹849
+//     Discount: ₹100 off
+//     Total: ₹749
+//
+// Total: ₹42297
+```
+
+---
+
+## 8.5 Best Practices & Design Principles 📚
+
+### **1. Single Responsibility Principle (SRP)**
+
+**Har class ka ek hi kaam hona chahiye**
+
+typescript
+
+```typescript
+// ❌ Bad - Too many responsibilities
+class User {
+    name: string;
+    email: string;
+    
+    save(): void {
+        // Database logic
+    }
+    
+    sendEmail(): void {
+        // Email logic
+    }
+    
+    generateReport(): void {
+        // Report logic
+    }
+}
+
+// ✅ Good - Separate responsibilities
+class User {
+    constructor(public name: string, public email: string) {}
+}
+
+class UserRepository {
+    save(user: User): void {
+        // Database logic
+    }
+}
+
+class EmailService {
+    sendEmail(user: User, message: string): void {
+        // Email logic
+    }
+}
+
+class ReportGenerator {
+    generateUserReport(user: User): void {
+        // Report logic
+    }
+}
+```
+
+---
+
+### **2. Open/Closed Principle**
+
+**Extension ke liye open, modification ke liye closed**
+
+typescript
+
+```typescript
+// ❌ Bad - Modification required for new shapes
+class AreaCalculator {
+    calculateArea(shape: any): number {
+        if (shape.type === "circle") {
+            return Math.PI * shape.radius ** 2;
+        } else if (shape.type === "rectangle") {
+            return shape.width * shape.height;
+        }
+        // Naya shape? Code modify karna padega!
+        return 0;
+    }
+}
+
+// ✅ Good - Extend with new classes, no modification
+interface Shape {
+    calculateArea(): number;
+}
+
+class Circle implements Shape {
+    constructor(private radius: number) {}
+    calculateArea(): number {
+        return Math.PI * this.radius ** 2;
+    }
+}
+
+class Rectangle implements Shape {
+    constructor(private width: number, private height: number) {}
+    calculateArea(): number {
+        return this.width * this.height;
+    }
+}
+
+// Naya shape? Bas naya class banao, existing code touch mat karo
+class Triangle implements Shape {
+    constructor(private base: number, private height: number) {}
+    calculateArea(): number {
+        return 0.5 * this.base * this.height;
+    }
+}
+```
+
+---
+
+### **3. Dependency Inversion Principle**
+
+**High-level modules ko low-level details par depend nahi hona chahiye**
+
+typescript
+
+```typescript
+// ❌ Bad - Direct dependency on concrete class
+class EmailNotifier {
+    send(message: string): void {
+        console.log(`Sending email: ${message}`);
+    }
+}
+
+class UserService {
+    private notifier = new EmailNotifier();  // Tight coupling!
+    
+    registerUser(name: string): void {
+        // Registration logic
+        this.notifier.send("Welcome!");
+    }
+}
+
+// ✅ Good - Depend on abstraction
+interface Notifier {
+    send(message: string): void;
+}
+
+class EmailNotifier implements Notifier {
+    send(message: string): void {
+        console.log(`Sending email: ${message}`);
+    }
+}
+
+class SMSNotifier implements Notifier {
+    send(message: string): void {
+        console.log(`Sending SMS: ${message}`);
+    }
+}
+
+class UserService {
+    constructor(private notifier: Notifier) {}  // Dependency injection
+    
+    registerUser(name: string): void {
+        // Registration logic
+        this.notifier.send("Welcome!");
+    }
+}
+
+// Flexible usage
+let service1 = new UserService(new EmailNotifier());
+let service2 = new UserService(new SMSNotifier());
+```
+
+---
+
+### **4. Composition Over Inheritance**
+
+**Zyada inheritance mat karo, composition use karo**
+
+typescript
+
+```typescript
+// ❌ Bad - Deep inheritance
+class Animal {}
+class Mammal extends Animal {}
+class Dog extends Mammal {}
+class Puppy extends Dog {}  // Too deep!
+
+// ✅ Good - Composition
+interface Behavior {
+    execute(): void;
+}
+
+class BarkBehavior implements Behavior {
+    execute(): void {
+        console.log("Woof!");
+    }
+}
+
+class FlyBehavior implements Behavior {
+    execute(): void {
+        console.log("Flying!");
+    }
+}
+
+class Animal {
+    constructor(private behavior: Behavior) {}
+    
+    performBehavior(): void {
+        this.behavior.execute();
+    }
+    
+    setBehavior(behavior: Behavior): void {
+        this.behavior = behavior;
+    }
+}
+
+let dog = new Animal(new BarkBehavior());
+dog.performBehavior();  // "Woof!"
+
+let bird = new Animal(new FlyBehavior());
+bird.performBehavior();  // "Flying!"
+```
+
+---
+
+### **5. Keep It Simple (KISS)**
+
+typescript
+
+```typescript
+// ❌ Over-engineered
+abstract class AbstractFactoryPattern<T> {
+    abstract createInstance(): T;
+}
+
+class ConcreteFactory<T> extends AbstractFactoryPattern<T> {
+    constructor(private creator: () => T) {
+        super();
+    }
+    createInstance(): T {
+        return this.creator();
+    }
+}
+
+// ✅ Simple and clear
+class UserFactory {
+    createUser(name: string, email: string): User {
+        return new User(name, email);
+    }
+}
+```
+
+---
+
+
+**Kya seekha?**
+
+- ✅ Abstract classes
+- ✅ Interface implementation
+- ✅ Multiple interfaces
+- ✅ Polymorphism
+- ✅ Real-world examples
+- ✅ Design principles
+- ✅ Best practices
+
+core ts completes here .....

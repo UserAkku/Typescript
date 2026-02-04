@@ -1,0 +1,1101 @@
+# **PART 4: Objects - Real Power of TypeScript**
+
+## 4.1 Objects Kya Hote Hain? (Concept Clear Karo)
+
+### **Real Life Example:**
+
+Socho ek **student** ke baare mein:
+
+- **Name**: Rahul
+- **Age**: 25
+- **Roll Number**: 101
+- **Email**: [rahul@college.com](mailto:rahul@college.com)
+- **Is Active**: true
+
+Ye sab **properties** hain ek student ki. JavaScript/TypeScript mein isko **object** kehte hain.
+
+typescript
+
+```typescript
+let student = {
+    name: "Rahul",
+    age: 25,
+    rollNumber: 101,
+    email: "rahul@college.com",
+    isActive: true
+};
+```
+
+**Object = Related data ko ek saath group karna**
+
+---
+
+### **JavaScript Mein Objects Ki Problem**
+
+javascript
+
+```javascript
+// JavaScript
+let user = {
+    name: "Rahul",
+    age: 25
+};
+
+// Koi problem nahi - par dangerous!
+console.log(user.email);  // undefined - property exist nahi karti
+user.age = "twenty five"; // Type change ho gaya - error nahi
+user.country = "India";   // Naya property add ho gaya
+```
+
+**Problems:**
+
+1. Koi guarantee nahi ki konsi properties hain
+2. Typo se undefined mil jayega
+3. Type kisi bhi property ka change ho sakta hai
+4. Structure consistent nahi rehta
+
+---
+
+### **TypeScript Solution - Type Safety**
+
+TypeScript mein **pehle se define** karo object ka structure:
+
+typescript
+
+```typescript
+let user: { name: string; age: number } = {
+    name: "Rahul",
+    age: 25
+};
+```
+
+**Isko padho:**
+
+- `user` ek object hai
+- Isme `name` property hai jo `string` type ki hogi
+- Isme `age` property hai jo `number` type ki hogi
+
+typescript
+
+```typescript
+console.log(user.email);  // ❌ Error - Property 'email' does not exist
+user.age = "25";          // ❌ Error - Type 'string' not assignable to 'number'
+```
+
+---
+
+## 4.2 Object Type Annotation - Basic Se Shuru Karo
+
+### **Method 1: Inline Type Definition**
+
+typescript
+
+```typescript
+// Basic object
+let person: { name: string; age: number } = {
+    name: "Rahul",
+    age: 25
+};
+
+// Semicolon (;) ya comma (,) dono chalenge
+let product: { 
+    name: string, 
+    price: number 
+} = {
+    name: "Phone",
+    price: 20000
+};
+```
+
+**Formatting tip:**
+
+typescript
+
+```typescript
+// Single line (chhota object)
+let point: { x: number; y: number } = { x: 10, y: 20 };
+
+// Multiple lines (bada object)
+let user: {
+    name: string;
+    age: number;
+    email: string;
+} = {
+    name: "Rahul",
+    age: 25,
+    email: "rahul@example.com"
+};
+```
+
+---
+
+### **Example 1: Product Object**
+
+typescript
+
+```typescript
+let product: {
+    id: number;
+    name: string;
+    price: number;
+    inStock: boolean;
+} = {
+    id: 1,
+    name: "Laptop",
+    price: 45000,
+    inStock: true
+};
+
+// Sab properties present honi chahiye
+let invalidProduct: {
+    id: number;
+    name: string;
+    price: number;
+    inStock: boolean;
+} = {
+    id: 2,
+    name: "Mouse"
+    // ❌ Error - price aur inStock missing!
+};
+```
+
+---
+
+### **Example 2: Function Parameters Mein Objects**
+
+typescript
+
+```typescript
+function printUser(user: { name: string; age: number }): void {
+    console.log(`Name: ${user.name}, Age: ${user.age}`);
+}
+
+printUser({ name: "Rahul", age: 25 });  // ✅ OK
+
+printUser({ name: "Simran" });  // ❌ Error - age missing
+
+printUser({ name: "Raj", age: 30, city: "Delhi" });  
+// ❌ Error - Extra property 'city'
+```
+
+**Object literal ki strict checking:**
+
+- Jitni properties type mein defined hain, utni hi pass karo
+- Zyada nahi, kam nahi
+
+---
+
+## 4.3 Type Aliases - Reusable Types Banao 🔄
+
+### **Problem: Repeated Types**
+
+typescript
+
+```typescript
+// Har baar poora type likhna padega
+function createUser(user: { name: string; age: number; email: string }): void {
+    // ...
+}
+
+function updateUser(user: { name: string; age: number; email: string }): void {
+    // ...
+}
+
+function deleteUser(user: { name: string; age: number; email: string }): void {
+    // ...
+}
+```
+
+**Problems:**
+
+- Code repetition
+- Agar structure change karna ho to har jagah change karna padega
+- Maintenance nightmare
+
+---
+
+### **Solution: Type Alias**
+
+typescript
+
+```typescript
+// Ek baar define karo
+type User = {
+    name: string;
+    age: number;
+    email: string;
+};
+
+// Har jagah use karo
+function createUser(user: User): void {
+    // ...
+}
+
+function updateUser(user: User): void {
+    // ...
+}
+
+function deleteUser(user: User): void {
+    // ...
+}
+```
+
+**Benefits:**
+
+- ✅ Code clean aur readable
+- ✅ Ek jagah change, sab jagah reflect
+- ✅ Autocomplete milega
+- ✅ Reusability
+
+---
+
+### **Type Alias Syntax**
+
+typescript
+
+```typescript
+type TypeName = {
+    property1: type1;
+    property2: type2;
+};
+```
+
+**Naming convention:**
+
+- PascalCase use karo (pehla letter capital)
+- Descriptive name do
+
+typescript
+
+```typescript
+// ✅ Good names
+type User = { ... };
+type Product = { ... };
+type OrderDetails = { ... };
+
+// ❌ Bad names
+type user = { ... };      // lowercase
+type x = { ... };         // not descriptive
+type thing = { ... };     // vague
+```
+
+---
+
+### **Type Alias Examples**
+
+#### **Example 1: E-commerce System**
+
+typescript
+
+```typescript
+type Product = {
+    id: number;
+    name: string;
+    price: number;
+    category: string;
+    inStock: boolean;
+};
+
+type CartItem = {
+    product: Product;
+    quantity: number;
+};
+
+type Order = {
+    orderId: string;
+    items: CartItem[];
+    totalAmount: number;
+    customerName: string;
+};
+
+// Usage
+let laptop: Product = {
+    id: 1,
+    name: "Dell Laptop",
+    price: 45000,
+    category: "Electronics",
+    inStock: true
+};
+
+let cartItem: CartItem = {
+    product: laptop,
+    quantity: 2
+};
+
+let order: Order = {
+    orderId: "ORD123",
+    items: [cartItem],
+    totalAmount: 90000,
+    customerName: "Rahul"
+};
+```
+
+---
+
+#### **Example 2: Social Media App**
+
+typescript
+
+```typescript
+type User = {
+    userId: string;
+    username: string;
+    email: string;
+    displayName: string;
+    bio: string;
+};
+
+type Post = {
+    postId: string;
+    author: User;
+    content: string;
+    likes: number;
+    comments: Comment[];
+    createdAt: Date;
+};
+
+type Comment = {
+    commentId: string;
+    author: User;
+    text: string;
+    createdAt: Date;
+};
+
+// Usage
+let user: User = {
+    userId: "u1",
+    username: "rahul_123",
+    email: "rahul@example.com",
+    displayName: "Rahul Kumar",
+    bio: "Developer from India"
+};
+
+let post: Post = {
+    postId: "p1",
+    author: user,
+    content: "Learning TypeScript!",
+    likes: 42,
+    comments: [],
+    createdAt: new Date()
+};
+```
+
+---
+
+## 4.4 Interfaces - Objects Ka Blueprint 📐
+
+### **Interface Kya Hai?**
+
+Interface = **Contract/Agreement**
+
+Ye define karta hai:
+
+- Object mein **konsi properties** honi chahiye
+- Har property ka **type** kya hoga
+- Kaunsi properties **optional** hain
+
+typescript
+
+```typescript
+interface User {
+    name: string;
+    age: number;
+    email: string;
+}
+```
+
+**Padho aise:**
+
+- "User interface kehta hai ki..."
+- "Har User object mein name (string), age (number), aur email (string) hona chahiye"
+
+---
+
+### **Interface Basic Example**
+
+typescript
+
+```typescript
+interface Person {
+    firstName: string;
+    lastName: string;
+    age: number;
+}
+
+// ✅ Correct - sab properties present
+let person1: Person = {
+    firstName: "Rahul",
+    lastName: "Kumar",
+    age: 25
+};
+
+// ❌ Error - lastName missing
+let person2: Person = {
+    firstName: "Simran",
+    age: 23
+};
+
+// ❌ Error - age is string, should be number
+let person3: Person = {
+    firstName: "Raj",
+    lastName: "Sharma",
+    age: "30"
+};
+```
+
+---
+
+### **Interface with Methods**
+
+Objects mein **functions** bhi ho sakte hain:
+
+typescript
+
+```typescript
+interface Calculator {
+    add(a: number, b: number): number;
+    subtract(a: number, b: number): number;
+}
+
+let calc: Calculator = {
+    add: (a, b) => a + b,
+    subtract: (a, b) => a - b
+};
+
+console.log(calc.add(5, 3));       // 8
+console.log(calc.subtract(10, 4)); // 6
+```
+
+**Method definition ke 2 ways:**
+
+typescript
+
+```typescript
+interface Example {
+    // Method 1: Function signature style
+    method1(param: string): void;
+    
+    // Method 2: Property with function type
+    method2: (param: string) => void;
+}
+```
+
+**Real Example: User Service**
+
+typescript
+
+```typescript
+interface UserService {
+    getUser(id: number): User;
+    createUser(name: string, email: string): User;
+    deleteUser(id: number): boolean;
+}
+
+let userService: UserService = {
+    getUser(id) {
+        // Database se fetch
+        return { id, name: "Rahul", email: "r@e.com" };
+    },
+    createUser(name, email) {
+        // Database mein save
+        return { id: 1, name, email };
+    },
+    deleteUser(id) {
+        // Database se delete
+        return true;
+    }
+};
+```
+
+---
+
+## 4.5 Optional Properties - Zaroori Nahi Hai ❓
+
+### **Problem: Har Property Zaroori Nahi Hoti**
+
+typescript
+
+```typescript
+interface User {
+    name: string;
+    age: number;
+    email: string;
+    phone: string;  // Sabke paas phone nahi hota
+}
+
+// ❌ Error - phone missing
+let user: User = {
+    name: "Rahul",
+    age: 25,
+    email: "rahul@example.com"
+};
+```
+
+---
+
+### **Solution: Question Mark (?) Use Karo**
+
+typescript
+
+```typescript
+interface User {
+    name: string;
+    age: number;
+    email: string;
+    phone?: string;  // Optional property
+}
+
+// ✅ OK - phone nahi diya
+let user1: User = {
+    name: "Rahul",
+    age: 25,
+    email: "rahul@example.com"
+};
+
+// ✅ OK - phone diya
+let user2: User = {
+    name: "Simran",
+    age: 23,
+    email: "simran@example.com",
+    phone: "9876543210"
+};
+```
+
+---
+
+### **Optional Properties - Safety**
+
+typescript
+
+```typescript
+interface Product {
+    name: string;
+    price: number;
+    description?: string;  // Optional
+}
+
+function displayProduct(product: Product): void {
+    console.log(product.name);
+    console.log(product.price);
+    
+    // ❌ Unsafe - description undefined ho sakta hai
+    console.log(product.description.length);
+    
+    // ✅ Safe - pehle check karo
+    if (product.description) {
+        console.log(product.description.length);
+    }
+    
+    // ✅ Safe - optional chaining
+    console.log(product.description?.length);
+}
+```
+
+---
+
+### **Real Example: Form Data**
+
+typescript
+
+```typescript
+interface ContactForm {
+    name: string;           // Required
+    email: string;          // Required
+    phone?: string;         // Optional
+    message: string;        // Required
+    company?: string;       // Optional
+    website?: string;       // Optional
+}
+
+let form1: ContactForm = {
+    name: "Rahul",
+    email: "rahul@example.com",
+    message: "Hello!"
+};  // ✅ Valid
+
+let form2: ContactForm = {
+    name: "Simran",
+    email: "simran@example.com",
+    phone: "9876543210",
+    message: "Need help",
+    company: "TechCorp"
+};  // ✅ Valid
+```
+
+---
+
+## 4.6 Readonly Properties - Change Mat Karne Do 🔒
+
+### **Problem: Accidentally Change Ho Jata Hai**
+
+typescript
+
+```typescript
+interface Config {
+    apiUrl: string;
+    apiKey: string;
+}
+
+let config: Config = {
+    apiUrl: "https://api.example.com",
+    apiKey: "secret123"
+};
+
+// Galti se change ho gaya!
+config.apiKey = "newkey";  // Dangerous!
+```
+
+---
+
+### **Solution: Readonly Keyword**
+
+typescript
+
+```typescript
+interface Config {
+    readonly apiUrl: string;
+    readonly apiKey: string;
+}
+
+let config: Config = {
+    apiUrl: "https://api.example.com",
+    apiKey: "secret123"
+};
+
+console.log(config.apiUrl);  // ✅ Read kar sakte ho
+
+config.apiKey = "newkey";    // ❌ Error - Cannot assign to 'apiKey' because it is a read-only property
+```
+
+---
+
+### **Readonly Examples**
+
+#### **Example 1: Database Configuration**
+
+typescript
+
+```typescript
+interface DatabaseConfig {
+    readonly host: string;
+    readonly port: number;
+    readonly username: string;
+    readonly password: string;
+    readonly database: string;
+}
+
+let dbConfig: DatabaseConfig = {
+    host: "localhost",
+    port: 5432,
+    username: "admin",
+    password: "secret",
+    database: "myapp"
+};
+
+// ✅ Use kar sakte ho
+console.log(`Connecting to ${dbConfig.host}:${dbConfig.port}`);
+
+// ❌ Change nahi kar sakte
+dbConfig.host = "newhost";  // Error!
+```
+
+---
+
+#### **Example 2: User Profile (Partial Readonly)**
+
+typescript
+
+```typescript
+interface User {
+    readonly id: number;        // ID kabhi change nahi honi chahiye
+    readonly createdAt: Date;   // Creation time fixed
+    name: string;               // Name change ho sakta hai
+    email: string;              // Email change ho sakta hai
+    age: number;                // Age change ho sakta hai
+}
+
+let user: User = {
+    id: 1,
+    createdAt: new Date(),
+    name: "Rahul",
+    email: "rahul@example.com",
+    age: 25
+};
+
+// ✅ Update allowed
+user.name = "Rahul Kumar";
+user.email = "rahul.new@example.com";
+user.age = 26;
+
+// ❌ Update not allowed
+user.id = 2;              // Error!
+user.createdAt = new Date();  // Error!
+```
+
+---
+
+## 4.7 Extending Interfaces - Inheritance 🧬
+
+### **Problem: Common Properties Repeat Hote Hain**
+
+typescript
+
+```typescript
+interface Person {
+    name: string;
+    age: number;
+}
+
+interface Student {
+    name: string;      // Repeated
+    age: number;       // Repeated
+    rollNumber: number;
+    grade: string;
+}
+
+interface Teacher {
+    name: string;      // Repeated
+    age: number;       // Repeated
+    subject: string;
+    salary: number;
+}
+```
+
+---
+
+### **Solution: Extend Karo**
+
+typescript
+
+```typescript
+interface Person {
+    name: string;
+    age: number;
+}
+
+// Student extends Person
+interface Student extends Person {
+    rollNumber: number;
+    grade: string;
+}
+
+// Teacher extends Person
+interface Teacher extends Person {
+    subject: string;
+    salary: number;
+}
+
+// Usage
+let student: Student = {
+    name: "Rahul",      // From Person
+    age: 20,            // From Person
+    rollNumber: 101,    // Student specific
+    grade: "A"          // Student specific
+};
+
+let teacher: Teacher = {
+    name: "Mr. Sharma", // From Person
+    age: 35,            // From Person
+    subject: "Math",    // Teacher specific
+    salary: 50000       // Teacher specific
+};
+```
+
+---
+
+### **Multiple Inheritance**
+
+typescript
+
+```typescript
+interface Flyable {
+    fly(): void;
+    altitude: number;
+}
+
+interface Swimmable {
+    swim(): void;
+    depth: number;
+}
+
+// Duck dono kar sakta hai
+interface Duck extends Flyable, Swimmable {
+    quack(): void;
+}
+
+let duck: Duck = {
+    altitude: 100,
+    fly() {
+        console.log("Flying at altitude:", this.altitude);
+    },
+    depth: 5,
+    swim() {
+        console.log("Swimming at depth:", this.depth);
+    },
+    quack() {
+        console.log("Quack quack!");
+    }
+};
+```
+
+---
+
+### **Real Example: User System**
+
+typescript
+
+```typescript
+interface BaseEntity {
+    readonly id: string;
+    readonly createdAt: Date;
+    readonly updatedAt: Date;
+}
+
+interface User extends BaseEntity {
+    username: string;
+    email: string;
+    password: string;
+}
+
+interface Post extends BaseEntity {
+    title: string;
+    content: string;
+    authorId: string;
+}
+
+interface Comment extends BaseEntity {
+    text: string;
+    postId: string;
+    authorId: string;
+}
+
+// Har entity ko id, createdAt, updatedAt automatically mil gaye
+```
+
+---
+
+## 4.8 Index Signatures - Dynamic Properties 🔑
+
+### **Problem: Runtime Par Property Names Pata Nahi**
+
+typescript
+
+```typescript
+// Translation dictionary
+let translations = {
+    hello: "नमस्ते",
+    bye: "अलविदा",
+    thanks: "धन्यवाद"
+    // Runtime par aur bhi add ho sakte hain
+};
+```
+
+**Kaise type karein?** Property names pehle se pata nahi!
+
+---
+
+### **Solution: Index Signature**
+
+typescript
+
+```typescript
+interface TranslationDict {
+    [key: string]: string;
+}
+
+let translations: TranslationDict = {
+    hello: "नमस्ते",
+    bye: "अलविदा",
+    thanks: "धन्यवाद"
+};
+
+// Runtime par add karo
+translations.welcome = "स्वागत";      // ✅ OK
+translations.goodbye = "फिर मिलेंगे";  // ✅ OK
+
+console.log(translations["hello"]);    // "नमस्ते"
+```
+
+**Syntax:**
+
+typescript
+
+```typescript
+interface MyType {
+    [key: KeyType]: ValueType;
+}
+```
+
+- `[key: string]` - Key ka type (usually string)
+- `: string` - Value ka type
+
+---
+
+### **Index Signature Examples**
+
+#### **Example 1: User Scores**
+
+typescript
+
+```typescript
+interface ScoreBoard {
+    [username: string]: number;
+}
+
+let scores: ScoreBoard = {
+    "rahul": 95,
+    "simran": 87,
+    "raj": 92
+};
+
+// Add new scores
+scores["amit"] = 88;
+scores["priya"] = 90;
+
+// Access
+console.log(scores["rahul"]);  // 95
+
+// Loop through
+for (let username in scores) {
+    console.log(`${username}: ${scores[username]}`);
+}
+```
+
+---
+
+#### **Example 2: Configuration Object**
+
+typescript
+
+```typescript
+interface Config {
+    [setting: string]: string | number | boolean;
+}
+
+let appConfig: Config = {
+    theme: "dark",           // string
+    fontSize: 14,            // number
+    autoSave: true,          // boolean
+    language: "en"           // string
+};
+
+appConfig.notifications = true;
+appConfig.maxItems = 100;
+```
+
+---
+
+#### **Example 3: Mixed Fixed + Dynamic Properties**
+
+typescript
+
+```typescript
+interface UserPreferences {
+    // Fixed properties
+    theme: "light" | "dark";
+    language: string;
+    
+    // Dynamic properties
+    [key: string]: string | number | boolean;
+}
+
+let prefs: UserPreferences = {
+    theme: "dark",
+    language: "en",
+    // Dynamic
+    fontSize: 16,
+    autoSave: true,
+    customColor: "#ff0000"
+};
+```
+
+---
+
+## 4.9 Nested Objects - Objects Ke Andar Objects 🪆
+
+### **Real Life Example:**
+
+Student object mein address object:
+
+typescript
+
+```typescript
+interface Address {
+    street: string;
+    city: string;
+    state: string;
+    pincode: number;
+}
+
+interface Student {
+    name: string;
+    age: number;
+    address: Address;  // Nested object
+}
+
+let student: Student = {
+    name: "Rahul",
+    age: 20,
+    address: {
+        street: "MG Road",
+        city: "Bangalore",
+        state: "Karnataka",
+        pincode: 560001
+    }
+};
+
+// Access nested properties
+console.log(student.address.city);  // "Bangalore"
+```
+
+---
+
+### **Deep Nesting Example**
+
+typescript
+
+```typescript
+interface Company {
+    name: string;
+    address: {
+        office: {
+            building: string;
+            floor: number;
+            room: string;
+        };
+        city: string;
+        country: string;
+    };
+    employees: number;
+}
+
+let company: Company = {
+    name: "TechCorp",
+    address: {
+        office: {
+            building: "Tower A",
+            floor: 5,
+            room: "501"
+        },
+        city: "Mumbai",
+        country: "India"
+    },
+    employees: 150
+};
+
+console.log(company.address.office.floor);  // 5
+```
+
+---
+
+
+**Kya seekha:**
+
+- ✅ Objects kya hote hain aur kyun use karte hain
+- ✅ Type Aliases - reusable types
+- ✅ Interfaces - object blueprints
+- ✅ Optional properties (?)
+- ✅ Readonly properties
+- ✅ Extending interfaces
+- ✅ Index signatures
+- ✅ Nested objects

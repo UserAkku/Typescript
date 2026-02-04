@@ -1,0 +1,851 @@
+# **PART 3: Arrays, Tuples, Enums & Objects**
+
+## 3.1 Arrays - Ek Hi Type Ki List 📋
+
+### **Array Kya Hai? (Concept)**
+
+Real life mein socho:
+
+- **Fruits ki tokri** 🍎🍌🍊 - Sirf fruits
+- **Books ki shelf** 📚📕📗 - Sirf books
+- **Students ki list** 👨‍🎓👩‍🎓 - Sirf students
+
+**TypeScript mein bhi same:**
+
+- Array = Ek hi type ki cheezein ek saath
+- Sab items ka **same type** hona chahiye
+
+---
+
+### **JavaScript Mein Arrays Kaise The?**
+
+JavaScript mein **kuch bhi** daal sakte the:
+
+javascript
+
+```javascript
+// JavaScript - Sab kuch mixed
+let mixedArray = [1, "hello", true, null, { name: "Rahul" }];
+// Koi problem nahi! Par confusion zyada
+```
+
+**Problem kya thi?**
+
+- Pata nahi array mein kya type ka data hai
+- Loop chalate waqt har item ko check karna padta tha
+- Typo se wrong method call ho sakta tha
+
+javascript
+
+```javascript
+let numbers = [1, 2, 3, "4", 5];  // Galti se "4" string ban gaya
+
+let sum = 0;
+for (let num of numbers) {
+    sum += num;  // "4" string ke saath add hoga - weird result
+}
+console.log(sum);  // "0123445" or kuch aur weird
+```
+
+---
+
+### **TypeScript Mein Arrays Kaise Hain?**
+
+TypeScript mein **type specify** karna padta hai:
+
+typescript
+
+```typescript
+// Method 1: Type[]=
+let numbers: number[] = [1, 2, 3, 4, 5];
+```
+
+**Isko padho aise:**
+
+- `numbers` naam ka array hai
+- `number[]` matlab "numbers ki array"
+- Square brackets `[]` matlab "array"
+
+typescript
+
+```typescript
+// Method 2: Array<Type> (Generic syntax)
+let names: Array<string> = ["Rahul", "Simran", "Raj"];
+```
+
+**Dono methods same hain**, preference tumhari!
+
+---
+
+### **Arrays Ke Examples - Step by Step**
+
+#### **Example 1: Numbers Array**
+
+typescript
+
+```typescript
+let marks: number[] = [85, 90, 78, 92, 88];
+
+// Sab array methods kaam karenge
+let total = marks.reduce((sum, mark) => sum + mark, 0);
+console.log(total);  // 433
+
+let average = total / marks.length;
+console.log(average);  // 86.6
+
+// Ab agar galat type add karo
+marks.push(95);        // ✅ OK - number hai
+marks.push("95");      // ❌ Error! String nahi daal sakte
+```
+
+**Why useful?**
+
+- Compiler pakka karega ki sirf numbers hain
+- `.reduce()`, `.map()` safely use kar sakte ho
+- Calculations mein koi surprise nahi
+
+---
+
+#### **Example 2: Strings Array**
+
+typescript
+
+```typescript
+let cities: string[] = ["Delhi", "Mumbai", "Bangalore"];
+
+// String methods safely use karo
+let upperCities = cities.map(city => city.toUpperCase());
+console.log(upperCities);  // ["DELHI", "MUMBAI", "BANGALORE"]
+
+// Filter karo
+let longNames = cities.filter(city => city.length > 5);
+console.log(longNames);  // ["Mumbai", "Bangalore"]
+
+// Galat type
+cities.push("Chennai");   // ✅ OK
+cities.push(123);         // ❌ Error!
+```
+
+---
+
+#### **Example 3: Mixed Types - Union Array**
+
+**Kya agar tumhe multiple types chahiye?**
+
+typescript
+
+```typescript
+// Union type use karo
+let mixed: (number | string)[] = [1, "hello", 2, "world"];
+```
+
+**Isko padho:**
+
+- Array hai jo ya to `number` ho sakta hai ya `string`
+- Parentheses zaroori hain: `(number | string)[]`
+
+typescript
+
+```typescript
+mixed.push(3);          // ✅ OK - number
+mixed.push("test");     // ✅ OK - string
+mixed.push(true);       // ❌ Error - boolean nahi allowed
+```
+
+**Real Example:**
+
+typescript
+
+```typescript
+// Excel sheet jaise data
+let row: (string | number)[] = ["Rahul", 25, "Delhi", 50000];
+//                              name    age  city    salary
+```
+
+---
+
+#### **Example 4: Empty Array - Type Pehle Declare Karo**
+
+typescript
+
+```typescript
+// ❌ Galat way
+let items = [];  // Type 'any[]' ban jayega
+items.push(1);
+items.push("hello");  // Kuch bhi daal sakte ho - dangerous!
+
+// ✅ Sahi way
+let numbers: number[] = [];  // Empty par type specified
+numbers.push(1);      // ✅ OK
+numbers.push("2");    // ❌ Error!
+```
+
+---
+
+#### **Example 5: 2D Arrays (Array of Arrays)**
+
+typescript
+
+```typescript
+// Matrix / Table
+let matrix: number[][] = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+];
+
+console.log(matrix[0][0]);  // 1
+console.log(matrix[1][2]);  // 6
+
+// Tic-Tac-Toe board
+let board: string[][] = [
+    ["X", "O", "X"],
+    ["O", "X", "O"],
+    ["O", "X", "X"]
+];
+```
+
+**Real Example: Student Marks**
+
+typescript
+
+```typescript
+// Har student ke subjects ke marks
+let studentMarks: number[][] = [
+    [85, 90, 78],  // Student 1: Math, Science, English
+    [92, 88, 95],  // Student 2
+    [70, 75, 80]   // Student 3
+];
+
+// Calculate total for student 1
+let student1Total = studentMarks[0].reduce((sum, mark) => sum + mark, 0);
+console.log(student1Total);  // 253
+```
+
+---
+
+#### **Example 6: Readonly Arrays - Change Mat Karne Do**
+
+typescript
+
+```typescript
+let fixedNumbers: readonly number[] = [1, 2, 3, 4, 5];
+
+console.log(fixedNumbers[0]);  // ✅ Read kar sakte ho
+
+fixedNumbers.push(6);          // ❌ Error - Cannot modify
+fixedNumbers[0] = 10;          // ❌ Error - Cannot modify
+fixedNumbers.pop();            // ❌ Error - Cannot modify
+```
+
+**Kab use kare?**
+
+- Configuration data
+- Constants list
+- Data jo change nahi hona chahiye
+
+typescript
+
+```typescript
+const WEEKDAYS: readonly string[] = [
+    "Monday", "Tuesday", "Wednesday", "Thursday", 
+    "Friday", "Saturday", "Sunday"
+];
+
+// Koi accidentally change na kar sake
+```
+
+---
+
+## 3.2 Tuples - Fixed Length Aur Order Wala Array 🎯
+
+### **Tuple Kya Hai?**
+
+**Real life example:**
+
+- **Coordinates**: `(10, 20)` - Pehla X, doosra Y (fixed order)
+- **Date**: `(2024, 1, 15)` - Year, Month, Day (fixed order)
+- **RGB Color**: `(255, 0, 128)` - Red, Green, Blue (fixed order)
+
+**Key points:**
+
+- **Fixed length** - Exact itne elements
+- **Fixed types** - Har position ka type fixed
+- **Order matters** - Pehla number, doosra string, etc.
+
+---
+
+### **Array vs Tuple - Difference Samjho**
+
+typescript
+
+```typescript
+// Array - Same type, any length
+let numbers: number[] = [1, 2, 3, 4, 5, 6, 7];  // Jitne chahiye daalo
+
+// Tuple - Different types, fixed length
+let person: [string, number] = ["Rahul", 25];  // Exactly 2, order fixed
+```
+
+---
+
+### **Tuple Examples - Detail Mein**
+
+#### **Example 1: Basic Tuple**
+
+typescript
+
+```typescript
+// User: [name, age]
+let user: [string, number] = ["Rahul", 25];
+```
+
+**Breakdown:**
+
+- Pehla element: `string` (name)
+- Doosra element: `number` (age)
+- Exactly 2 elements hone chahiye
+
+typescript
+
+```typescript
+console.log(user[0]);  // "Rahul" - type: string
+console.log(user[1]);  // 25 - type: number
+
+// Galat order
+let wrongUser: [string, number] = [25, "Rahul"];  // ❌ Error!
+
+// Zyada elements
+let tooMany: [string, number] = ["Rahul", 25, "Delhi"];  // ❌ Error!
+
+// Kam elements  
+let tooFew: [string, number] = ["Rahul"];  // ❌ Error!
+```
+
+---
+
+#### **Example 2: Coordinates (Real Use Case)**
+
+typescript
+
+```typescript
+// Map coordinates: [latitude, longitude]
+let location: [number, number] = [28.6139, 77.2090];  // Delhi
+
+function getDistance(point1: [number, number], point2: [number, number]): number {
+    // Calculate distance
+    let [lat1, lon1] = point1;
+    let [lat2                , lon2] = point2;
+    // Formula...
+    return distance;
+}
+
+let delhi: [number, number] = [28.6139, 77.2090];
+let mumbai: [number, number] = [19.0760, 72.8777];
+let distance = getDistance(delhi, mumbai);
+```
+
+**Why tuple here?**
+
+- Latitude aur longitude ka order important hai
+- Hamesha exactly 2 numbers chahiye
+- Array se better type safety
+
+---
+
+#### **Example 3: RGB Color**
+
+typescript
+
+```typescript
+// RGB: [red, green, blue] - Each 0-255
+type RGBColor = [number, number, number];
+
+let red: RGBColor = [255, 0, 0];
+let green: RGBColor = [0, 255, 0];
+let blue: RGBColor = [0, 0, 255];
+let purple: RGBColor = [128, 0, 128];
+
+function createColor(r: number, g: number, b: number): RGBColor {
+    return [r, g, b];
+}
+
+let customColor = createColor(100, 150, 200);
+```
+
+---
+
+#### **Example 4: API Response (Very Common)**
+
+typescript
+
+```typescript
+// API response: [statusCode, data]
+type ApiResponse = [number, string];
+
+function fetchUser(id: number): ApiResponse {
+    if (id === 1) {
+        return [200, "User found"];  // Success
+    } else {
+        return [404, "User not found"];  // Error
+    }
+}
+
+let [status, message] = fetchUser(1);
+console.log(status);   // 200
+console.log(message);  // "User found"
+```
+
+---
+
+#### **Example 5: Optional Tuple Elements**
+
+typescript
+
+```typescript
+// Third element optional
+let point: [number, number, number?] = [10, 20];  // ✅ OK - 2D point
+let point3D: [number, number, number?] = [10, 20, 30];  // ✅ OK - 3D point
+
+// Question mark (?) = optional
+```
+
+**Real Example:**
+
+typescript
+
+```typescript
+// Address: [street, city, state?]
+type Address = [string, string, string?];
+
+let addr1: Address = ["MG Road", "Bangalore"];  // ✅ No state
+let addr2: Address = ["CP", "Delhi", "Delhi"];  // ✅ With state
+```
+
+---
+
+#### **Example 6: Rest Elements in Tuples**
+
+typescript
+
+```typescript
+// Pehle fixed, baaki variable
+let data: [string, ...number[]] = ["Scores", 85, 90, 78, 92];
+//        ^^^^^^  ^^^^^^^^^^^^
+//        fixed   variable length
+
+console.log(data[0]);  // "Scores" - string
+console.log(data[1]);  // 85 - number
+console.log(data[2]);  // 90 - number
+// ... jitne chahiye numbers
+```
+
+**Real Example:**
+
+typescript
+
+```typescript
+// Log entry: [timestamp, level, ...messages]
+type LogEntry = [Date, string, ...string[]];
+
+let log1: LogEntry = [new Date(), "ERROR", "Database connection failed"];
+let log2: LogEntry = [new Date(), "INFO", "User logged in", "IP: 192.168.1.1", "Browser: Chrome"];
+```
+
+---
+
+#### **Example 7: React useState (Famous Example)**
+
+typescript
+
+```typescript
+// React Hook - Returns tuple
+function useState<T>(initial: T): [T, (value: T) => void] {
+    let state = initial;
+    const setState = (value: T) => {
+        state = value;
+    };
+    return [state, setState];  // Tuple return
+}
+
+// Usage
+const [count, setCount] = useState(0);
+//     ^^^^^  ^^^^^^^^
+//     value  setter function
+
+setCount(5);  // Update count
+console.log(count);  // 5
+```
+
+**Why tuple?**
+
+- Pehla element: current value
+- Doosra element: update function
+- Order fixed hai
+- Destructuring easy hai
+
+---
+
+#### **Example 8: Readonly Tuples**
+
+typescript
+
+```typescript
+// Change nahi kar sakte
+let point: readonly [number, number] = [10, 20];
+
+console.log(point[0]);  // ✅ Read OK
+point[0] = 30;          // ❌ Error - readonly hai
+```
+
+---
+
+### **Tuple vs Array - Kab Kya Use Kare?**
+
+<table>
+<tbody><tr><th colspan="1" rowspan="1"><p>Use Case</p></th><th colspan="1" rowspan="1"><p>Use This</p></th><th colspan="1" rowspan="1"><p>Example</p></th></tr><tr><td colspan="1" rowspan="1"><p>Same type ki list, variable length</p></td><td colspan="1" rowspan="1"><p>Array</p></td><td colspan="1" rowspan="1"><p><code class="hljs" spellcheck="false">number[]</code> - marks list</p></td></tr><tr><td colspan="1" rowspan="1"><p>Different types, fixed positions</p></td><td colspan="1" rowspan="1"><p>Tuple</p></td><td colspan="1" rowspan="1"><p><code class="hljs" spellcheck="false">[string, number]</code> - name, age</p></td></tr><tr><td colspan="1" rowspan="1"><p>Order matter nahi karta</p></td><td colspan="1" rowspan="1"><p>Array</p></td><td colspan="1" rowspan="1"><p>Shopping cart items</p></td></tr><tr><td colspan="1" rowspan="1"><p>Order bahut important</p></td><td colspan="1" rowspan="1"><p>Tuple</p></td><td colspan="1" rowspan="1"><p>Coordinates, RGB</p></td></tr><tr><td colspan="1" rowspan="1"><p>Length variable</p></td><td colspan="1" rowspan="1"><p>Array</p></td><td colspan="1" rowspan="1"><p>Student list</p></td></tr><tr><td colspan="1" rowspan="1"><p>Length fixed</p></td><td colspan="1" rowspan="1"><p>Tuple</p></td><td colspan="1" rowspan="1"><p>Date (year, month, day)</p></td></tr></tbody>
+</table>
+
+---
+
+## 3.3 Enums - Named Constants Ka Group 🏷️
+
+### **Enum Kya Hai?**
+
+**Real life example:**
+
+- **Days of week**: Monday, Tuesday, ... Sunday (fixed set)
+- **Traffic lights**: Red, Yellow, Green (fixed options)
+- **User roles**: Admin, User, Guest (fixed roles)
+
+**Problem without enum:**
+
+typescript
+
+```typescript
+// ❌ String literals use karna
+let userRole = "admin";  // Typo ho sakta hai
+userRole = "admim";      // Galat spelling, par error nahi
+
+// ❌ Numbers use karna  
+let status = 1;  // 1 ka matlab kya? Yaad rakhna padega
+```
+
+**Solution: Enum**
+
+typescript
+
+```typescript
+enum UserRole {
+    Admin,
+    User,
+    Guest
+}
+
+let role: UserRole = UserRole.Admin;  // Clear aur type-safe
+```
+
+---
+
+### **Enum Types - 3 Main Types Hain**
+
+#### **Type 1: Numeric Enum (Default)**
+
+typescript
+
+```typescript
+enum Direction {
+    Up,      // 0
+    Down,    // 1
+    Left,    // 2
+    Right    // 3
+}
+
+console.log(Direction.Up);     // 0
+console.log(Direction.Down);   // 1
+console.log(Direction.Left);   // 2
+console.log(Direction.Right);  // 3
+```
+
+**Kaise kaam karta hai?**
+
+- First member ko `0` milta hai automatically
+- Baaki ko auto-increment (`1`, `2`, `3`...)
+
+**Custom starting number:**
+
+typescript
+
+```typescript
+enum Status {
+    Pending = 1,    // Start from 1
+    InProgress,     // 2 (auto)
+    Completed       // 3 (auto)
+}
+
+console.log(Status.Pending);      // 1
+console.log(Status.InProgress);   // 2
+console.log(Status.Completed);    // 3
+```
+
+**Har ek ko custom value:**
+
+typescript
+
+```typescript
+enum HttpStatus {
+    OK = 200,
+    Created = 201,
+    BadRequest = 400,
+    NotFound = 404,
+    ServerError = 500
+}
+
+console.log(HttpStatus.OK);           // 200
+console.log(HttpStatus.NotFound);     // 404
+```
+
+---
+
+#### **Type 2: String Enum (Most Common)**
+
+typescript
+
+```typescript
+enum Color {
+    Red = "RED",
+    Green = "GREEN",
+    Blue = "BLUE"
+}
+
+console.log(Color.Red);    // "RED"
+console.log(Color.Green);  // "GREEN"
+console.log(Color.Blue);   // "BLUE"
+```
+
+**Why better than numeric?**
+
+- Debugging mein readable
+- Database mein meaningful values
+- API responses clear
+
+**Real Example:**
+
+typescript
+
+```typescript
+enum OrderStatus {
+    Pending = "PENDING",
+    Processing = "PROCESSING",
+    Shipped = "SHIPPED",
+    Delivered = "DELIVERED",
+    Cancelled = "CANCELLED"
+}
+
+function updateOrderStatus(orderId: number, status: OrderStatus): void {
+    console.log(`Order ${orderId} is now ${status}`);
+    // Database update...
+}
+
+updateOrderStatus(123, OrderStatus.Shipped);
+// Output: "Order 123 is now SHIPPED"
+```
+
+---
+
+#### **Type 3: Heterogeneous Enum (Mixed)**
+
+typescript
+
+```typescript
+enum Mixed {
+    No = 0,
+    Yes = "YES"
+}
+```
+
+**Note:** Isko avoid karo, confusing hai!
+
+---
+
+### **Enum Ka Use - Real Examples**
+
+#### **Example 1: User Roles & Permissions**
+
+typescript
+
+```typescript
+enum UserRole {
+    Admin = "ADMIN",
+    Moderator = "MODERATOR",
+    User = "USER",
+    Guest = "GUEST"
+}
+
+function checkPermission(role: UserRole): boolean {
+    switch (role) {
+        case UserRole.Admin:
+            return true;  // Full access
+        case UserRole.Moderator:
+            return true;  // Limited access
+        case UserRole.User:
+            return false; // No admin access
+        case UserRole.Guest:
+            return false; // No access
+    }
+}
+
+let currentUserRole: UserRole = UserRole.User;
+let hasAccess = checkPermission(currentUserRole);
+console.log(hasAccess);  // false
+```
+
+**Benefits:**
+
+- Typo nahi ho sakta (`UserRole.Admni` error dega)
+- Autocomplete milega
+- Refactoring easy
+
+---
+
+#### **Example 2: API Response Status**
+
+typescript
+
+```typescript
+enum ApiStatus {
+    Loading = "LOADING",
+    Success = "SUCCESS",
+    Error = "ERROR"
+}
+
+interface ApiState {
+    status: ApiStatus;
+    data: any;
+    error: string | null;
+}
+
+let apiState: ApiState = {
+    status: ApiStatus.Loading,
+    data: null,
+    error: null
+};
+
+// API call start
+apiState.status = ApiStatus.Loading;
+
+// API call success
+apiState.status = ApiStatus.Success;
+apiState.data = { user: "Rahul" };
+
+// API call failed
+apiState.status = ApiStatus.Error;
+apiState.error = "Network error";
+```
+
+---
+
+#### **Example 3: Game States**
+
+typescript
+
+```typescript
+enum GameState {
+    Menu = "MENU",
+    Playing = "PLAYING",
+    Paused = "PAUSED",
+    GameOver = "GAME_OVER"
+}
+
+let currentState: GameState = GameState.Menu;
+
+function handleGameState(state: GameState): void {
+    switch (state) {
+        case GameState.Menu:
+            console.log("Show menu");
+            break;
+        case GameState.Playing:
+            console.log("Game running");
+            break;
+        case GameState.Paused:
+            console.log("Game paused");
+            break;
+        case GameState.GameOver:
+            console.log("Show game over screen");
+            break;
+    }
+}
+```
+
+---
+
+### **Const Enum - Performance Boost**
+
+typescript
+
+```typescript
+const enum Direction {
+    Up = "UP",
+    Down = "DOWN"
+}
+
+let move = Direction.Up;
+```
+
+**Kya farak hai?**
+
+- Compile time par **inline** ho jata hai
+- Runtime mein object create nahi hota
+- Bundle size chota
+
+**Compiled JavaScript:**
+
+javascript
+
+```javascript
+// Without const
+var Direction;
+(function (Direction) {
+    Direction["Up"] = "UP";
+    Direction["Down"] = "DOWN";
+})(Direction || (Direction = {}));
+let move = Direction.Up;
+
+// With const
+let move = "UP";  // Direct value!
+```
+
+---
+
+### **Enum Reverse Mapping (Numeric Only)**
+
+typescript
+
+```typescript
+enum Status {
+    Active = 1,
+    Inactive = 2
+}
+
+console.log(Status.Active);    // 1 (name to value)
+console.log(Status[1]);        // "Active" (value to name) 
+console.log(Status[2]);        // "Inactive"
+```
+
+**Real use:**
+
+typescript
+
+```typescript
+let statusCode = 1;
+let statusName = Status[statusCode];  // "Active"
+console.log(`Status: ${statusName}`);
+```
+
+---
+
+**Kya seekha?**
+
+- ✅ Arrays (deep detail)
+- ✅ Tuples (kya, kab, kyun)
+- ✅ Enums (types aur real examples)
